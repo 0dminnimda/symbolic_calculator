@@ -17,10 +17,13 @@ com:
 
 .PHONY: show_test
 show_test:
-	- printf "*\nx + x*y + y\nx - y"            | ./src/main.out
-	- printf "-\na + 3*y - b\n-1*x + 3*y - 5*z" | ./src/main.out
-	- printf "=\n-1*x + y*z\nz * y - x"         | ./src/main.out
-	- printf "=\n-1*x + y*z\nz * y - x" 	    | ./src/main.out
+	- printf "*\nx + x*y + y\nx - y"              | ./src/main.out
+	#
+	- printf " - \na + 3*y - b\n-1*x + 3*y - 5*z" | ./src/main.out
+	#
+	- printf "=\n-1*x + y*z\nz * y - x"           | ./src/main.out
+	#
+	- printf "=\n-1*x + y*z\nz * y - x" 	      | ./src/main.out
 
 
 .PHONY: clean
