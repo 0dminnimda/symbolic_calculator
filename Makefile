@@ -6,10 +6,13 @@ else
 	FLAGS =
 endif
 
+COMPATS = src/compatibility/read_line.c src/compatibility/string.c
+SRCS = src/main.c src/sum_of_product.c
+
 
 .PHONY: com
 com:
-	$(CC) -o src/main.out src/main.c src/compatibility/read_line.c $(FLAGS)
+	$(CC) -o src/main.out $(SRCS) $(COMPATS) $(FLAGS)
 
 
 .PHONY: clean
