@@ -52,8 +52,8 @@ def do_test(exec_path: Path, path: Path, file: str) -> bool:
     relative_path = path.relative_to(Path.cwd())
     if result.stdout != output:
         print(f"{RED}Test failed: {relative_path}{CLEAR}")
-        print(f"  {YELLOW}Expected:{CLEAR}\n{output}")
-        print(f"  {YELLOW}Received:{CLEAR}\n{result.stdout}")
+        print(f"Expected:\n{YELLOW}{output}{CLEAR}")
+        print(f"Received:\n{YELLOW}{result.stdout}{CLEAR}")
         return False
     else:
         print(f"{GREEN}Test succeeded: {relative_path}{CLEAR}")
