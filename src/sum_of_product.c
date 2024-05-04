@@ -9,25 +9,25 @@
 
 void Term_construct(Term *self, size_t variable_index, Term *next_term) {
     self->variable_index = variable_index;
-    self->next_term = next_term;
+    self->next = next_term;
 }
 void Term_destruct(Term *self) {}
 
 void Product_construct(Product *self, long coefficient, Product *next_product) {
     self->coefficient = coefficient;
     self->terms = NULL;
-    self->next_product = next_product;
+    self->next = next_product;
 }
 void Product_destruct(Product *self) {
     for (Term *term = self->terms; term != NULL;) {
         Term_destruct(term);
-        Term *next_term = term->next_term;
+        Term *next_term = term->next;
         free(term);
         term = next_term;
     }
 }
 void Product_insert_term(Product *self, Term *term) {
-    term->next_term = self->terms;
+    term->next = self->terms;
     self->terms = term;
 }
 
@@ -73,18 +73,18 @@ void SumOfProducts_destruct(SumOfProducts *self) {
     Variables_destruct(&self->variables);
     for (Product *product = self->products; product != NULL;) {
         Product_destruct(product);
-        Product *next_product = product->next_product;
+        Product *next_product = product->next;
         free(product);
         product = next_product;
     }
 }
 void SumOfProducts_insert_product(SumOfProducts *self, Product *product) {
-    product->next_product = self->products;
+    product->next = self->products;
     self->products = product;
 }
 void SumOfProducts_fprint(SumOfProducts *self, FILE *stream) {
     bool first_product = true;
-    for (Product *product = self->products; product != NULL; product = product->next_product) {
+    for_list (Product *, product, self->products) {
         bool first_term = true;
 
         if (!first_product) {
@@ -102,7 +102,7 @@ void SumOfProducts_fprint(SumOfProducts *self, FILE *stream) {
             first_term = false;
         }
 
-        for (Term *term = product->terms; term != NULL; term = term->next_term) {
+        for_list (Term *, term, product->terms) {
             if (!first_term) {
                 fprintf(stream, "*");
             }

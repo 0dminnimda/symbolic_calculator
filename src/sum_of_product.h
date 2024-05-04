@@ -11,13 +11,13 @@
 
 typedef struct Term {
     size_t variable_index;
-    struct Term *next_term;
+    struct Term *next;
 } Term;
 
 typedef struct Product {
     long coefficient;
     Term *terms;
-    struct Product *next_product;
+    struct Product *next;
 } Product;
 
 typedef struct {
@@ -52,6 +52,8 @@ variables(...):
     [2]: "airspeed_velocity_of_an_unladen_swallow"
     ...
 */
+
+#define for_list(type, item, list) for (type item = list; item != NULL; item = item->next)
 
 void Term_construct(Term *self, size_t variable_index, Term *next_term);
 void Term_destruct(Term *self);
