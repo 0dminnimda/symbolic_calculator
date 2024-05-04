@@ -58,7 +58,7 @@ int main(void) {
     if (!parse_sum_of_product_with_errors(equation2, &sum2)) {
         return 1;
     }
-    printf("sucessfully parsed both sides!\n");
+
     SumOfProducts_fprint(&sum1, stdout);
     printf("\n");
     SumOfProducts_fprint(&sum2, stdout);
