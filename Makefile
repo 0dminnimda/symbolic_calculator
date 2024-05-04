@@ -13,7 +13,7 @@ DATA =
 
 .PHONY: com
 com:
-	$(CC) -o src/main.out $(SRCS) $(COMPATS) $(FLAGS)
+	$(CC) -o src/main.out -pedantic -Wall -Wextra $(SRCS) $(COMPATS) $(FLAGS)
 
 
 .PHONY: valgrind
