@@ -140,7 +140,7 @@ def do_test(exec_path: Path, path: Path, file: str) -> bool:
 
 
 
-DEFAULT_PATTERNS = [str(DIR / "*.test")]
+DEFAULT_PATTERNS = [str(DIR / "**/*.test")]
 
 
 def main(argv: list[str] = sys.argv) -> None:
