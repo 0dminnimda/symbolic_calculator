@@ -15,7 +15,7 @@ void Term_copy(Term *self, Term *copy) { copy->variable_index = self->variable_i
 void Product_construct(Product *self, long coefficient, Product *next_product) {
     self->coefficient = coefficient;
     self->terms = NULL;
-    self->term_count = 0;
+    self->terms_count = 0;
     self->next = next_product;
 }
 void Product_destruct(Product *self) {
@@ -59,7 +59,7 @@ void Product_fprint(
     }
 }
 void Product_copy(Product *self, Product *copy) {
-    copy->term_count = 0;
+    copy->terms_count = 0;
     copy->coefficient = self->coefficient;
     for_list(Term *, term, self->terms) {
         Term *new_term = malloc(sizeof(Term));
@@ -70,13 +70,13 @@ void Product_copy(Product *self, Product *copy) {
 void Product_insert_term(Product *self, Term *term) {
     term->next = self->terms;
     self->terms = term;
-    ++self->term_count;
+    ++self->terms_count;
 }
 bool Product_are_mapped_terms_equal(
     const Product *self, const Product *other, size_t length_of_variables,
     long *array_length_of_variables, const size_t *index_map_for_other
 ) {
-    if (self->term_count != other->term_count) return false;
+    if (self->terms_count != other->terms_count) return false;
 
     memset(array_length_of_variables, 0, length_of_variables * sizeof(long));
     for_list(Term *, term, self->terms) { array_length_of_variables[term->variable_index] += 1; }
