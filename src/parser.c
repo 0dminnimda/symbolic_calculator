@@ -69,10 +69,16 @@ bool parse_term(Parser *parser, Term *result) {
         if (!isalnum(*parser->str) && *parser->str != '_') break;
     }
 
+    String variable;
+    // it's ok to remove constness from start, Variables_insert does not modify the string
+    String_construct_slice(&variable, (char *)start, parser->str - start);
 #ifdef DEBUG_PARSER
-    printf("parse_term, matched '%.*s'\n", (int)(parser->str - start), start);
+    printf("parse_term, matched '");
+    String_fprint(&variable, stdout);
+    printf("' (%zu)\n", variable.length);
 #endif
-    result->variable_index = Variables_insert(&parser->sop->variables, start, parser->str - start);
+    result->variable_index = Variables_insert(&parser->sop->variables, &variable);
+    // don't destruct variable, since it's a slice, it does not own memory
 
     return true;
 }

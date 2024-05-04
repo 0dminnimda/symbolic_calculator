@@ -5,6 +5,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include "sized_string.h"
 
 typedef struct Term {
     size_t variable_index;
@@ -18,7 +19,7 @@ typedef struct Product {
 } Product;
 
 typedef struct {
-    char **data;
+    String *data;
     size_t capacity;
     size_t size;
 } Variables;
@@ -59,8 +60,8 @@ void Product_insert_term(Product *self, Term *term);
 
 void Variables_construct(Variables *self, size_t capcity);
 void Variables_destruct(Variables *self);
-size_t Variables_find(Variables *self, const char *variable, size_t length);
-size_t Variables_insert(Variables *self, const char *variable, size_t length);
+size_t Variables_find(Variables *self, const String *string);
+size_t Variables_insert(Variables *self, const String *string);
 
 void SumOfProducts_construct(SumOfProducts *self);
 void SumOfProducts_destruct(SumOfProducts *self);

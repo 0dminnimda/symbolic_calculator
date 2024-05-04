@@ -34,34 +34,34 @@ void Product_insert_term(Product *self, Term *term) {
 void Variables_construct(Variables *self, size_t capcity) {
     self->capacity = capcity;
     self->size = 0;
-    self->data = malloc(capcity * sizeof(char *));
+    self->data = malloc(capcity * sizeof(String));
 }
 void Variables_destruct(Variables *self) {
     for (size_t i = 0; i < self->size; ++i) {
-        free(self->data[i]);
+        String_destruct(&self->data[i]);
     }
     free(self->data);
 }
-size_t Variables_find(Variables *self, const char *variable, size_t length) {
+size_t Variables_find(Variables *self, const String *string) {
     for (size_t i = 0; i < self->size; ++i) {
-        if (strncmp(self->data[i], variable, length) == 0) {
+        if (String_compare(&self->data[i], string) == 0) {
             return i;
         }
     }
     return SIZE_MAX;
 }
-size_t Variables_insert(Variables *self, const char *variable, size_t length) {
-    size_t index = Variables_find(self, variable, length);
+size_t Variables_insert(Variables *self, const String *string) {
+    size_t index = Variables_find(self, string);
     if (index != SIZE_MAX) {
         return index;
     }
 
     if (self->size >= self->capacity) {
         self->capacity = self->capacity * 2 + 1;
-        self->data = realloc(self->data, self->capacity * sizeof(char *));
+        self->data = realloc(self->data, self->capacity * sizeof(String));
     }
 
-    self->data[self->size] = string_duplicate_length(variable, length);
+    String_copy(string, &self->data[self->size]);
     return self->size++;
 }
 
@@ -106,7 +106,7 @@ void SumOfProducts_fprint(SumOfProducts *self, FILE *stream) {
             if (!first_term) {
                 fprintf(stream, "*");
             }
-            fprintf(stream, "%s", self->variables.data[term->variable_index]);
+            String_fprint(&self->variables.data[term->variable_index], stream);
             first_term = false;
         }
 

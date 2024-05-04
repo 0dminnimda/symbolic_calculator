@@ -8,7 +8,7 @@ else
 endif
 
 COMPATS = src/compatibility/read_line.c src/compatibility/string.c
-SRCS = src/main.c src/sum_of_product.c
+SRCS = src/main.c src/sum_of_product.c src/sized_string.c
 DATA = 
 
 .PHONY: com
