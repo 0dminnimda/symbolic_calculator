@@ -1,5 +1,7 @@
 #include "sum_of_product.h"
 
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -80,4 +82,35 @@ void SumOfProducts_destruct(SumOfProducts *self) {
 void SumOfProducts_insert_product(SumOfProducts *self, Product *product) {
     product->next_product = self->products;
     self->products = product;
+}
+void SumOfProducts_fprint(SumOfProducts *self, FILE *stream) {
+    bool first_product = true;
+    for (Product *product = self->products; product != NULL; product = product->next_product) {
+        bool first_term = true;
+
+        if (!first_product) {
+            fprintf(stream, " ");
+        }
+
+        if (product->coefficient == 1) {
+            if (!first_product) {
+                fprintf(stream, "+");
+            }
+        } else if (product->coefficient == -1) {
+            fprintf(stream, "-");
+        } else {
+            fprintf(stream, "%+ld", product->coefficient);
+            first_term = false;
+        }
+
+        for (Term *term = product->terms; term != NULL; term = term->next_term) {
+            if (!first_term) {
+                fprintf(stream, "*");
+            }
+            fprintf(stream, "%s", self->variables.data[term->variable_index]);
+            first_term = false;
+        }
+
+        first_product = false;
+    }
 }

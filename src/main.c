@@ -3,9 +3,8 @@
 #include <string.h>
 
 #include "compatibility/read_line.h"
-#include "sum_of_product.h"
 #include "parser.c"
-
+#include "sum_of_product.h"
 
 bool parse_sum_of_product_with_errors(const char *str, SumOfProducts *result) {
     const char *error;
@@ -18,7 +17,6 @@ bool parse_sum_of_product_with_errors(const char *str, SumOfProducts *result) {
     }
     return true;
 }
-
 
 int main(void) {
     char operation;
@@ -60,6 +58,11 @@ int main(void) {
     if (!parse_sum_of_product_with_errors(equation2, &sum2)) {
         return 1;
     }
+    printf("sucessfully parsed both sides!\n");
+    SumOfProducts_fprint(&sum1, stdout);
+    printf("\n");
+    SumOfProducts_fprint(&sum2, stdout);
+    printf("\n");
 
     SumOfProducts_destruct(&sum2);
     SumOfProducts_destruct(&sum1);

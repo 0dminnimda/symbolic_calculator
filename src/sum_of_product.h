@@ -4,6 +4,7 @@
 #define SUM_OF_PRODUCT_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 typedef struct Term {
     size_t variable_index;
@@ -64,5 +65,6 @@ size_t Variables_insert(Variables *self, const char *variable, size_t length);
 void SumOfProducts_construct(SumOfProducts *self);
 void SumOfProducts_destruct(SumOfProducts *self);
 void SumOfProducts_insert_product(SumOfProducts *self, Product *product);
+void SumOfProducts_fprint(SumOfProducts *self, FILE *stream);
 
 #endif  // SUM_OF_PRODUCT_H
