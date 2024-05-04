@@ -1,0 +1,6 @@
+$$INPUT$$
+=
+-1*x + y*z
+z * y - x
+$$OUTPUT$$
+equal
