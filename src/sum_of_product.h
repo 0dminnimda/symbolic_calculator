@@ -17,6 +17,7 @@ typedef struct Term {
 typedef struct Product {
     long coefficient;
     Term *terms;
+    size_t term_count;
     struct Product *next;
 } Product;
 
