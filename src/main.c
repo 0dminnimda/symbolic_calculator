@@ -22,16 +22,18 @@ bool parse_sum_of_product_with_errors(const char *str, SumOfProducts *result) {
 
 int main(void) {
     char operation;
-    scanf("%*[ \t\r\f\v]");  // UB? - passing NULL
-    if (scanf("%c", &operation) <= 0) {
+    char *operation_str = read_line();
+    if (operation_str == NULL) {
         fprintf(stderr, "Could not read operation\n");
         return 1;
     }
+    operation_str = (char *)skip_whitespaces(operation_str);
+    operation = *operation_str;
     if (operation != '+' && operation != '-' && operation != '*' && operation != '=') {
         fprintf(stderr, "Invalid operation, expected one of [+-*=]\n");
         return 1;
     }
-    scanf("%*[ \t\r\f\v]\n");  // UB? - passing NULL
+    free(operation_str);
 
     char *equation1 = read_line();
     if (equation1 == NULL) {
@@ -61,6 +63,9 @@ int main(void) {
 
     SumOfProducts_destruct(&sum2);
     SumOfProducts_destruct(&sum1);
+
+    free(equation2);
+    free(equation1);
 
     return 0;
 }
