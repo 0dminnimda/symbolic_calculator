@@ -50,16 +50,17 @@ int main(void) {
 
     SumOfProducts sum1;
     SumOfProducts_construct(&sum1);
-
-    SumOfProducts sum2;
-    SumOfProducts_construct(&sum2);
-
     if (!parse_sum_of_product_with_errors(equation1, &sum1)) {
         return 1;
     }
+    free(equation1);
+
+    SumOfProducts sum2;
+    SumOfProducts_construct(&sum2);
     if (!parse_sum_of_product_with_errors(equation2, &sum2)) {
         return 1;
     }
+    free(equation2);
 
 #ifdef DEBUG_MAIN
     printf("Parsed (");
@@ -71,9 +72,6 @@ int main(void) {
 
     SumOfProducts_destruct(&sum2);
     SumOfProducts_destruct(&sum1);
-
-    free(equation2);
-    free(equation1);
 
     return 0;
 }
