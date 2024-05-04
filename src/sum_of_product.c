@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "compatibility/string.h"
-
 void Term_construct(Term *self, size_t variable_index, Term *next_term) {
     self->variable_index = variable_index;
     self->next = next_term;
