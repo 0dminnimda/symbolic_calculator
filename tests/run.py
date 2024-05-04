@@ -85,9 +85,11 @@ def unify(output: str) -> list[tuple[int, list[str]]]:
 
 def compare_equation(relative_path: Path, expected_str: str, actual_str: str) -> bool:
     if expected_str != actual_str:
-        print(f"\n{RED}=== Test failed: {relative_path} ==={CLEAR}")
+        first_line = f"=== Test failed: {relative_path} ==="
+        print(RED + first_line + CLEAR)
         print(f"Expected:\n{YELLOW}{expected_str}{CLEAR}")
         print(f"Received:\n{YELLOW}{actual_str}{CLEAR}")
+        print(RED + "="*len(first_line) + CLEAR + "\n")
         return False
     else:
         print(f"{GREEN}Test succeeded: {relative_path}{CLEAR}")
@@ -98,10 +100,12 @@ def compare_binary(relative_path: Path, expected_str: str, actual_str: str) -> b
     expected = unify(expected_str)
     actual = unify(actual_str)
     if expected != actual:
-        print(f"\n{RED}=== Test failed: {relative_path} ==={CLEAR}")
+        first_line = f"=== Test failed: {relative_path} ==="
+        print(RED + first_line + CLEAR)
         print(f"Expected:\n{YELLOW}{expected_str}{CLEAR}")
         print(f"Received:\n{YELLOW}{actual_str}{CLEAR}")
         print(f"Hint {expected=} != {actual=}")
+        print(RED + "="*len(first_line) + CLEAR + "\n")
         return False
     else:
         print(f"{GREEN}Test succeeded: {relative_path}{CLEAR}")
