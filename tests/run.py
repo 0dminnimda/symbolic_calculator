@@ -115,7 +115,7 @@ def compare_binary(relative_path: Path, expected_str: str, actual_str: str) -> b
         print(f"Received:\n{YELLOW}{limit_str(actual_str, STR_LIM)}{CLEAR}")
         expected = limit_str(str(expected), STR_LIM)
         actual = limit_str(str(actual), STR_LIM)
-        print(f"Hint {expected=} != {actual=}")
+        print(f"Hint: {expected=} != {actual=}")
         print(RED + "="*len(first_line) + CLEAR + "\n")
         return False
     else:
