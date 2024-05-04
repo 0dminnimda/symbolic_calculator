@@ -19,7 +19,7 @@ typedef struct Product {
 
 typedef struct {
     char **data;
-    size_t capcity;
+    size_t capacity;
     size_t size;
 } Variables;
 

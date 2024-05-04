@@ -32,7 +32,7 @@ void Product_insert_term(Product *self, Term *term) {
 }
 
 void Variables_construct(Variables *self, size_t capcity) {
-    self->capcity = capcity;
+    self->capacity = capcity;
     self->size = 0;
     self->data = malloc(capcity * sizeof(char *));
 }
@@ -56,9 +56,9 @@ size_t Variables_insert(Variables *self, const char *variable, size_t length) {
         return index;
     }
 
-    if (self->size >= self->capcity) {
-        self->capcity = self->capcity * 2 + 1;
-        self->data = realloc(self->data, self->capcity * sizeof(char *));
+    if (self->size >= self->capacity) {
+        self->capacity = self->capacity * 2 + 1;
+        self->data = realloc(self->data, self->capacity * sizeof(char *));
     }
 
     self->data[self->size] = string_duplicate_length(variable, length);
