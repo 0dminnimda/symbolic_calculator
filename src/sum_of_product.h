@@ -67,10 +67,6 @@ void Product_fprint(
 );
 void Product_copy(Product *self, Product *copy);
 void Product_insert_term(Product *self, Term *term);
-bool Product_are_terms_equal(
-    const Product *self, const Product *other, size_t length_of_variables,
-    long *array_length_of_variables
-);
 bool Product_are_mapped_terms_equal(
     const Product *self, const Product *other, size_t length_of_variables,
     long *array_length_of_variables, const size_t *index_map_for_other
@@ -87,7 +83,7 @@ void SumOfProducts_fprint(SumOfProducts *self, FILE *stream);
 void SumOfProducts_insert_product(SumOfProducts *self, Product *product);
 Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_product);
 void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self);
-void SumOfProducts_add_sub_destructive(SumOfProducts *self, SumOfProducts *other, bool is_sub);
+void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *other, bool is_sub);
 bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *other);
 
 #endif  // SUM_OF_PRODUCT_H

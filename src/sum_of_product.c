@@ -69,20 +69,6 @@ void Product_insert_term(Product *self, Term *term) {
     term->next = self->terms;
     self->terms = term;
 }
-bool Product_are_terms_equal(
-    const Product *self, const Product *other, size_t length_of_variables,
-    long *array_length_of_variables
-) {
-    memset(array_length_of_variables, 0, length_of_variables * sizeof(long));
-    for_list(Term *, term, self->terms) { array_length_of_variables[term->variable_index] += 1; }
-    for_list(Term *, term, other->terms) { array_length_of_variables[term->variable_index] -= 1; }
-    for (size_t i = 0; i < length_of_variables; i++) {
-        if (array_length_of_variables[i] != 0) {
-            return false;
-        }
-    }
-    return true;
-}
 bool Product_are_mapped_terms_equal(
     const Product *self, const Product *other, size_t length_of_variables,
     long *array_length_of_variables, const size_t *index_map_for_other
@@ -198,17 +184,10 @@ void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self) {
         product = next_product;
     }
 }
-void SumOfProducts_add_sub_destructive(SumOfProducts *self, SumOfProducts *other, bool is_sub) {
+void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *other, bool is_sub) {
     size_t *index_map = malloc((self->variables.size + other->variables.size) * sizeof(size_t));
     for (size_t i = 0; i < other->variables.size; ++i) {
         index_map[i] = Variables_insert(&self->variables, &other->variables.data[i]);
-    }
-
-    // destructive: sets the other SOP's incides to be the same as self's
-    for_list(Product *, product, other->products) {
-        for_list(Term *, term, product->terms) {
-            term->variable_index = index_map[term->variable_index];
-        }
     }
 
     long *array_length_of_variables = malloc(self->variables.size * sizeof(long));
@@ -216,8 +195,9 @@ void SumOfProducts_add_sub_destructive(SumOfProducts *self, SumOfProducts *other
     for_list(Product *, product_other, other->products) {
         bool performed_operation = false;
         for_list(Product *, product_self, self->products) {
-            if (Product_are_terms_equal(
-                    product_self, product_other, self->variables.size, array_length_of_variables
+            if (Product_are_mapped_terms_equal(
+                    product_self, product_other, self->variables.size, array_length_of_variables,
+                    index_map
                 )) {
                 if (is_sub) {
                     product_self->coefficient -= product_other->coefficient;
@@ -240,6 +220,14 @@ void SumOfProducts_add_sub_destructive(SumOfProducts *self, SumOfProducts *other
             if (is_sub) {
                 new_product->coefficient = -new_product->coefficient;
             }
+            // since we don't act destructive, we did not map the indices previously
+            // we need to do it now instead, after the copy
+            for_list(Term *, term, new_product->terms) {
+                term->variable_index = index_map[term->variable_index];
+            }
+            // @Optimization because all new products in the 'other' are unique
+            // we don't need to check the newly added products
+            // when adding any other product from 'other'
             SumOfProducts_insert_product(self, new_product);
         }
     }
