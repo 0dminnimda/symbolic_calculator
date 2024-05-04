@@ -1,3 +1,4 @@
+import re
 import sys
 import subprocess
 from pathlib import Path
@@ -41,6 +42,69 @@ def resolve_patterns(patterns: list[str]) -> list[Path]:
     return sorted(include - ignore)
 
 
+PREP_SEP = "|"
+PREP_TABLE = {
+    "+": PREP_SEP,
+    "-": PREP_SEP + "-",
+}
+PREP_TRANS = str.maketrans(PREP_TABLE)
+
+
+def unify(output: str) -> list[tuple[int, list[str]]]:
+    output = re.sub(r"\s+", "", output)
+    if output.startswith("+"):
+        output = output[1:]
+
+    result = []
+    for product in output.translate(PREP_TRANS).split(PREP_SEP):
+        terms = product.split("*")
+        if not terms:
+            continue  # empty product - erroneus form
+
+        coefficient = 1
+        if terms[0].startswith("-"):
+            terms[0] = terms[0][1:]
+            coefficient = -1
+        elif terms[0].startswith("+"):
+            terms[0] = terms[0][1:]
+            pass # coefficient = 1
+
+        try:
+            coefficient *= int(terms[0])
+            terms = terms[1:]
+        except ValueError:
+            pass
+
+        result.append((coefficient, sorted(terms)))
+
+    return sorted(result)
+
+
+def compare_equation(relative_path: Path, expected_str: str, actual_str: str) -> bool:
+    if expected_str != actual_str:
+        print(f"\n{RED}=== Test failed: {relative_path} ==={CLEAR}")
+        print(f"Expected:\n{YELLOW}{expected_str}{CLEAR}")
+        print(f"Received:\n{YELLOW}{actual_str}{CLEAR}")
+        return False
+    else:
+        print(f"{GREEN}Test succeeded: {relative_path}{CLEAR}")
+        return True
+
+
+def compare_binary(relative_path: Path, expected_str: str, actual_str: str) -> bool:
+    expected = unify(expected_str)
+    actual = unify(actual_str)
+    if expected != actual:
+        print(f"\n{RED}=== Test failed: {relative_path} ==={CLEAR}")
+        print(f"Expected:\n{YELLOW}{expected_str}{CLEAR}")
+        print(f"Received:\n{YELLOW}{actual_str}{CLEAR}")
+        print(f"Hint {expected=} != {actual=}")
+        return False
+    else:
+        print(f"{GREEN}Test succeeded: {relative_path}{CLEAR}")
+        return True
+
+
 INPUT_SEP = "$$INPUT$$\n"
 OUTPUT_SEP = "$$OUTPUT$$\n"
 
@@ -49,16 +113,13 @@ def do_test(exec_path: Path, path: Path, file: str) -> bool:
     rest = file.partition(INPUT_SEP)[2]
     input, _, output = rest.partition(OUTPUT_SEP)
     result = run_command(exec_path, input=input)
-
     relative_path = path.relative_to(Path.cwd())
-    if result.stdout != output:
-        print(f"{RED}Test failed: {relative_path}{CLEAR}")
-        print(f"Expected:\n{YELLOW}{output}{CLEAR}")
-        print(f"Received:\n{YELLOW}{result.stdout}{CLEAR}")
-        return False
+
+    if input[0] == "=":
+        return compare_equation(relative_path, output, result.stdout)
     else:
-        print(f"{GREEN}Test succeeded: {relative_path}{CLEAR}")
-        return True
+        return compare_binary(relative_path, output, result.stdout)
+
 
 
 DEFAULT_PATTERNS = [str(DIR / "*.test")]
@@ -78,9 +139,9 @@ def main(argv: list[str] = sys.argv) -> None:
             failed += 1
 
     if failed == 0:
-        print(f"{GREEN}All {len(paths)} tests passed!{CLEAR}")
+        print(f"\n{GREEN}All {len(paths)} tests passed!{CLEAR}")
     else:
-        print(f"{RED}Some tests failed {failed}/{len(paths)}{CLEAR}")
+        print(f"\n{RED}Some tests failed {failed}/{len(paths)}{CLEAR}")
 
 
 if __name__ == "__main__":
