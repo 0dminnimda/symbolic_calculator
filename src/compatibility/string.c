@@ -21,3 +21,13 @@ char *string_duplicate_length(const char *source, size_t length) {
     copy[length] = '\0';
     return copy;
 }
+
+char *string_duplicate_known_length(const char *source, size_t length) {
+    char *copy = (char *)malloc((length + 1) * sizeof(char));
+    if (copy == NULL) {
+        return NULL;
+    }
+    memcpy(copy, source, length);
+    copy[length] = '\0';
+    return copy;
+}

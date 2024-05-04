@@ -2,3 +2,4 @@
 
 char *string_duplicate(const char *source);
 char *string_duplicate_length(const char *source, size_t length);
+char *string_duplicate_known_length(const char *source, size_t length);
