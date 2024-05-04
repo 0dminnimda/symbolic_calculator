@@ -58,12 +58,14 @@ variables(...):
 
 void Term_construct(Term *self, size_t variable_index, Term *next_term);
 void Term_destruct(Term *self);
+void Term_copy(Term *self, Term *copy);
 
 void Product_construct(Product *self, long coefficient, Product *next_product);
 void Product_destruct(Product *self);
 void Product_fprint(
     Product *self, FILE *stream, Variables *variables, bool printed_after_other_products
 );
+void Product_copy(Product *self, Product *copy);
 void Product_insert_term(Product *self, Term *term);
 bool Product_are_terms_equal(
     const Product *self, const Product *other, size_t length_of_variables,

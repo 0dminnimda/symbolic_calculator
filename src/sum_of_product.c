@@ -10,6 +10,9 @@ void Term_construct(Term *self, size_t variable_index, Term *next_term) {
     self->next = next_term;
 }
 void Term_destruct(Term *self) {}
+void Term_copy(Term *self, Term *copy) {
+    copy->variable_index = self->variable_index;
+}
 
 void Product_construct(Product *self, long coefficient, Product *next_product) {
     self->coefficient = coefficient;
@@ -54,6 +57,14 @@ void Product_fprint(
         }
         String_fprint(&variables->data[term->variable_index], stream);
         first_term = false;
+    }
+}
+void Product_copy(Product *self, Product *copy) {
+    copy->coefficient = self->coefficient;
+    for_list(Term *, term, self->terms) {
+        Term *new_term = malloc(sizeof(Term));
+        Term_copy(term, new_term);
+        Product_insert_term(copy, new_term);
     }
 }
 void Product_insert_term(Product *self, Term *term) {
@@ -188,20 +199,34 @@ void SumOfProducts_add_sub_destructive(SumOfProducts *self, SumOfProducts *other
 
     long *array_length_of_variables = malloc(self->variables.size * sizeof(long));
 
-    for_list(Product *, product1, self->products) {
-        for_list(Product *, product2, other->products) {
+    for_list(Product *, product_other, other->products) {
+        bool performed_operation = false;
+        for_list(Product *, product_self, self->products) {
             if (Product_are_terms_equal(
-                    product1, product2, self->variables.size, array_length_of_variables
+                    product_self, product_other, self->variables.size, array_length_of_variables
                 )) {
                 if (is_sub) {
-                    product1->coefficient -= product2->coefficient;
+                    product_self->coefficient -= product_other->coefficient;
                 } else {
-                    product1->coefficient += product2->coefficient;
+                    product_self->coefficient += product_other->coefficient;
                 }
+                performed_operation = true;
                 // canonical SOP don't contain repeating products with the same terms
                 // so we won't find anything further to add
                 break;
             }
+        }
+
+        // if we did not find anything to act upon -
+        // it means that the current term combination is not present in the self
+        // add it
+        if (!performed_operation) {
+            Product *new_product = malloc(sizeof(Product));
+            Product_copy(product_other, new_product);
+            if (is_sub) {
+                new_product->coefficient = -new_product->coefficient;
+            }
+            SumOfProducts_insert_product(self, new_product);
         }
     }
 
