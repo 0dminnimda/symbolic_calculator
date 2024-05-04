@@ -44,7 +44,11 @@ void Product_fprint(Product *self, FILE *stream, Variables *variables, bool prin
     } else if (self->coefficient == -1) {
         fprintf(stream, "-");
     } else {
-        fprintf(stream, "%+ld", self->coefficient);
+        if (printed_after_other_products) {
+            fprintf(stream, "%+ld", self->coefficient);
+        } else {
+            fprintf(stream, "%ld", self->coefficient);
+        }
         first_term = false;
     }
 
