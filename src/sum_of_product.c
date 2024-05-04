@@ -230,6 +230,9 @@ void SumOfProducts_add_sub_destructive(SumOfProducts *self, SumOfProducts *other
 
     SumOfProducts_remove_zero_coefficient_products(self);
 
+    // @FIXME after removing it's possible that we will have some unused strings
+    // but for now i think it's fine to leave it that way
+
     free(array_length_of_variables);
     free(index_map);
 }
