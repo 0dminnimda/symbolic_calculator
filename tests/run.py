@@ -127,10 +127,10 @@ INPUT_SEP = "$$INPUT$$\n"
 OUTPUT_SEP = "$$OUTPUT$$\n"
 
 
-def do_test(exec_path: Path, path: Path, file: str) -> bool:
+def do_test(exec_path: Path, path: Path, file: str, prepend_args: list[str]) -> bool:
     rest = file.partition(INPUT_SEP)[2]
     input, _, output = rest.partition(OUTPUT_SEP)
-    result = run_command(exec_path, input=input)
+    result = run_command(*prepend_args, exec_path, input=input)
     relative_path = path.relative_to(Path.cwd())
 
     if input[0] == "=":
@@ -142,18 +142,24 @@ def do_test(exec_path: Path, path: Path, file: str) -> bool:
 
 DEFAULT_PATTERNS = [str(DIR / "**/*.test")]
 
+VALGRIND = False
+
 
 def main(argv: list[str] = sys.argv) -> None:
     if len(argv) == 1:
         print(f"Usage: {argv[0]} <EXEC> <PATTERN ...>")
         exit(1)
 
+    prepend_args = []
+    if VALGRIND:
+        prepend_args = ["valgrind", "--leak-check=full", "--quiet"]
+
     exec_path = Path(argv[1])
     paths = resolve_patterns(argv[2:] or DEFAULT_PATTERNS)
 
     failed = 0
     for path in paths:
-        if not do_test(exec_path, path, path.read_text()):
+        if not do_test(exec_path, path, path.read_text(), prepend_args):
             failed += 1
 
     if failed == 0:
