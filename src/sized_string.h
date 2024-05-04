@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef SIZED_STRING_H
+#define SIZED_STRING_H
+
 #include <stddef.h>
 #include <stdio.h>
 
@@ -13,3 +18,5 @@ void String_destruct(String *self);
 void String_copy(const String *self, String *copy);
 int String_compare(const String *self, const String *other);
 int String_fprint(const String *self, FILE *stream);
+
+#endif  // SIZED_STRING_H

@@ -5,7 +5,9 @@
 
 #include <stddef.h>
 #include <stdio.h>
+
 #include "sized_string.h"
+
 
 typedef struct Term {
     size_t variable_index;

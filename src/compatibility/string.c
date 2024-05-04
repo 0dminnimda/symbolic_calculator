@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 char *string_duplicate(const char *source) {
     size_t len = strlen(source) + 1;
     char *copy = (char *)malloc(len * sizeof(char));

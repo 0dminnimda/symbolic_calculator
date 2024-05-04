@@ -20,6 +20,7 @@ def run_command(*args, input=None) -> subprocess.CompletedProcess:
         stderr=subprocess.STDOUT,
     )
 
+
 def resolve_patterns(patterns: list[str]) -> list[Path]:
     include = set()
     ignore = set()
@@ -40,7 +41,7 @@ def resolve_patterns(patterns: list[str]) -> list[Path]:
     return sorted(include - ignore)
 
 
-INPUT_SEP ="$$INPUT$$\n"
+INPUT_SEP = "$$INPUT$$\n"
 OUTPUT_SEP = "$$OUTPUT$$\n"
 
 

@@ -1,9 +1,8 @@
 #include "read_line.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-
 
 char *fread_line(FILE *stream) {
     size_t len = 0;

@@ -191,7 +191,9 @@ bool parse_sum_of_product(Parser *parser, SumOfProducts *result) {
     return true;
 }
 
-bool parse_sum_of_product_from_string(const char *str, SumOfProducts *result, const char **error_position) {
+bool parse_sum_of_product_from_string(
+    const char *str, SumOfProducts *result, const char **error_position
+) {
     Parser parser = {str, result};
     bool ret = parse_sum_of_product(&parser, result);
     if (!ret) {
