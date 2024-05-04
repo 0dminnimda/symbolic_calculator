@@ -81,6 +81,6 @@ void SumOfProducts_fprint(SumOfProducts *self, FILE *stream);
 void SumOfProducts_insert_product(SumOfProducts *self, Product *product);
 Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_product);
 void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self);
-void SumOfProducts_add_destructive(SumOfProducts *self, SumOfProducts *other);
+void SumOfProducts_add_sub_destructive(SumOfProducts *self, SumOfProducts *other, bool is_sub);
 
 #endif  // SUM_OF_PRODUCT_H

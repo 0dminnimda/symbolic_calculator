@@ -72,7 +72,13 @@ int main(void) {
 
     switch (operation) {
         case '+': {
-            SumOfProducts_add_destructive(&sum1, &sum2);
+            SumOfProducts_add_sub_destructive(&sum1, &sum2, false);
+            SumOfProducts_fprint(&sum1, stdout);
+            printf("\n");
+            break;
+        }
+        case '-': {
+            SumOfProducts_add_sub_destructive(&sum1, &sum2, true);
             SumOfProducts_fprint(&sum1, stdout);
             printf("\n");
             break;

@@ -173,7 +173,7 @@ void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self) {
         product = next_product;
     }
 }
-void SumOfProducts_add_destructive(SumOfProducts *self, SumOfProducts *other) {
+void SumOfProducts_add_sub_destructive(SumOfProducts *self, SumOfProducts *other, bool is_sub) {
     size_t *index_map = malloc((self->variables.size + other->variables.size) * sizeof(size_t));
     for (size_t i = 0; i < other->variables.size; ++i) {
         index_map[i] = Variables_insert(&self->variables, &other->variables.data[i]);
@@ -193,7 +193,11 @@ void SumOfProducts_add_destructive(SumOfProducts *self, SumOfProducts *other) {
             if (Product_are_terms_equal(
                     product1, product2, self->variables.size, array_length_of_variables
                 )) {
-                product1->coefficient += product2->coefficient;
+                if (is_sub) {
+                    product1->coefficient -= product2->coefficient;
+                } else {
+                    product1->coefficient += product2->coefficient;
+                }
                 // canonical SOP don't contain repeating products with the same terms
                 // so we won't find anything further to add
                 break;
