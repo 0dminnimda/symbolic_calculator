@@ -52,13 +52,16 @@ PREP_TRANS = str.maketrans(PREP_TABLE)
 
 def unify(output: str) -> list[tuple[int, list[str]]]:
     output = re.sub(r"\s+", "", output)
-    if output.startswith("+"):
+    output = output.translate(PREP_TRANS)
+    if output.startswith("|"):
+        # any +/- will make |+/-, so the first | is meaningless
         output = output[1:]
 
     result = []
-    for product in output.translate(PREP_TRANS).split(PREP_SEP):
+    for product in output.split(PREP_SEP):
         terms = product.split("*")
         if not terms:
+            result.append((1, terms))
             continue  # empty product - erroneus form
 
         coefficient = 1
