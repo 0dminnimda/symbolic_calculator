@@ -1,0 +1,6 @@
+$$INPUT$$
+-
+
+y - 2*x
+$$OUTPUT$$
+2*x - y
