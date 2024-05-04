@@ -9,10 +9,8 @@ void Term_construct(Term *self, size_t variable_index, Term *next_term) {
     self->variable_index = variable_index;
     self->next = next_term;
 }
-void Term_copy(Term *self, Term *copy) {
-    copy->variable_index = self->variable_index;
-}
 void Term_destruct(Term *self) { (void)self; }
+void Term_copy(Term *self, Term *copy) { copy->variable_index = self->variable_index; }
 
 void Product_construct(Product *self, long coefficient, Product *next_product) {
     self->coefficient = coefficient;
