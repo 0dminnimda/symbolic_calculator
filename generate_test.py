@@ -98,5 +98,5 @@ def generate_equality(equal: bool):
     return "".join(result)
 
 
-# print(generate_add_sub(True))
-print(generate_equality(True))
+# print(end=generate_add_sub(True))
+print(end=generate_equality(True))
