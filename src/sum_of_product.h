@@ -71,10 +71,14 @@ bool Product_are_terms_equal(
     const Product *self, const Product *other, size_t length_of_variables,
     long *array_length_of_variables
 );
+bool Product_are_mapped_terms_equal(
+    const Product *self, const Product *other, size_t length_of_variables,
+    long *array_length_of_variables, const size_t *index_map_for_other
+);
 
 void Variables_construct(Variables *self, size_t capcity);
 void Variables_destruct(Variables *self);
-size_t Variables_find(Variables *self, const String *string);
+size_t Variables_find(const Variables *self, const String *string);
 size_t Variables_insert(Variables *self, const String *string);
 
 void SumOfProducts_construct(SumOfProducts *self);
@@ -84,5 +88,6 @@ void SumOfProducts_insert_product(SumOfProducts *self, Product *product);
 Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_product);
 void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self);
 void SumOfProducts_add_sub_destructive(SumOfProducts *self, SumOfProducts *other, bool is_sub);
+bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *other);
 
 #endif  // SUM_OF_PRODUCT_H

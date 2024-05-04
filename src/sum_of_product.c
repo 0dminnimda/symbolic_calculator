@@ -83,6 +83,22 @@ bool Product_are_terms_equal(
     }
     return true;
 }
+bool Product_are_mapped_terms_equal(
+    const Product *self, const Product *other, size_t length_of_variables,
+    long *array_length_of_variables, const size_t *index_map_for_other
+) {
+    memset(array_length_of_variables, 0, length_of_variables * sizeof(long));
+    for_list(Term *, term, self->terms) { array_length_of_variables[term->variable_index] += 1; }
+    for_list(Term *, term, other->terms) {
+        array_length_of_variables[index_map_for_other[term->variable_index]] -= 1;
+    }
+    for (size_t i = 0; i < length_of_variables; i++) {
+        if (array_length_of_variables[i] != 0) {
+            return false;
+        }
+    }
+    return true;
+}
 
 void Variables_construct(Variables *self, size_t capcity) {
     self->capacity = capcity;
@@ -95,7 +111,7 @@ void Variables_destruct(Variables *self) {
     }
     free(self->data);
 }
-size_t Variables_find(Variables *self, const String *string) {
+size_t Variables_find(const Variables *self, const String *string) {
     for (size_t i = 0; i < self->size; ++i) {
         if (String_compare(&self->data[i], string) == 0) {
             return i;
@@ -235,4 +251,48 @@ void SumOfProducts_add_sub_destructive(SumOfProducts *self, SumOfProducts *other
 
     free(array_length_of_variables);
     free(index_map);
+}
+bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *other) {
+    // shortcut: if the variables don't map into eachother, the SOPs are not the same
+    // relies on the fact that all variables are used
+    if (self->variables.size != other->variables.size) {
+        return false;
+    }
+    size_t *index_map = malloc(self->variables.size * sizeof(size_t));
+    for (size_t i = 0; i < other->variables.size; ++i) {
+        size_t index = Variables_find(&self->variables, &other->variables.data[i]);
+        if (index == SIZE_MAX) {
+            free(index_map);
+            return false;
+        }
+        index_map[i] = index;
+    }
+
+    long *array_length_of_variables = malloc(self->variables.size * sizeof(long));
+
+    bool result = true;
+    for_list(Product *, product_self, self->products) {
+        bool found_equal = false;
+        for_list(Product *, product_other, other->products) {
+            if (product_self->coefficient == product_other->coefficient &&
+                Product_are_mapped_terms_equal(
+                    product_self, product_other, self->variables.size, array_length_of_variables,
+                    index_map
+                )) {
+                found_equal = true;
+                // canonical SOP don't contain repeating products with the same terms
+                // so we won't find anything further to process
+                break;
+            }
+        }
+
+        if (!found_equal) {
+            result = false;
+            break;
+        }
+    }
+
+    free(array_length_of_variables);
+    free(index_map);
+    return result;
 }

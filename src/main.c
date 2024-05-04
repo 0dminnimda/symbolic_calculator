@@ -83,12 +83,14 @@ int main(void) {
             printf("\n");
             break;
         }
-        // case '=':
-        //     if (SumOfProducts_equals(&sum1, &sum2)) {
-        //         printf("equal\n");
-        //     } else {
-        //         printf("not equal\n");
-        //     }
+        case '=': {
+            if (SumOfProducts_are_equal(&sum1, &sum2)) {
+                printf("equal\n");
+            } else {
+                printf("not equal\n");
+            }
+            break;
+        }
         default: printf("Operation not implemented '%c'\n", operation); break;
     }
 
