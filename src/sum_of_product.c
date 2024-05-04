@@ -24,11 +24,9 @@ void Product_destruct(Product *self) {
         term = next_term;
     }
 }
-void Product_insert_term(Product *self, Term *term) {
-    term->next = self->terms;
-    self->terms = term;
-}
-void Product_fprint(Product *self, FILE *stream, Variables *variables, bool printed_after_other_products) {
+void Product_fprint(
+    Product *self, FILE *stream, Variables *variables, bool printed_after_other_products
+) {
     bool first_term = true;
 
     if (printed_after_other_products) {
@@ -57,6 +55,10 @@ void Product_fprint(Product *self, FILE *stream, Variables *variables, bool prin
         String_fprint(&variables->data[term->variable_index], stream);
         first_term = false;
     }
+}
+void Product_insert_term(Product *self, Term *term) {
+    term->next = self->terms;
+    self->terms = term;
 }
 
 void Variables_construct(Variables *self, size_t capcity) {
@@ -106,10 +108,6 @@ void SumOfProducts_destruct(SumOfProducts *self) {
         product = next_product;
     }
 }
-void SumOfProducts_insert_product(SumOfProducts *self, Product *product) {
-    product->next = self->products;
-    self->products = product;
-}
 void SumOfProducts_fprint(SumOfProducts *self, FILE *stream) {
     bool first_product = true;
     for_list(Product *, product, self->products) {
@@ -117,4 +115,8 @@ void SumOfProducts_fprint(SumOfProducts *self, FILE *stream) {
 
         first_product = false;
     }
+}
+void SumOfProducts_insert_product(SumOfProducts *self, Product *product) {
+    product->next = self->products;
+    self->products = product;
 }
