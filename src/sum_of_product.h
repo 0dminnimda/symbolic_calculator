@@ -54,6 +54,7 @@ variables(...):
 */
 
 #define for_list(type, item, list) for (type item = list; item != NULL; item = item->next)
+#define for_list_my_next(type, item, list) for (type item = list; item != NULL;)
 
 void Term_construct(Term *self, size_t variable_index, Term *next_term);
 void Term_destruct(Term *self);

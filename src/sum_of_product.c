@@ -17,7 +17,7 @@ void Product_construct(Product *self, long coefficient, Product *next_product) {
     self->next = next_product;
 }
 void Product_destruct(Product *self) {
-    for (Term *term = self->terms; term != NULL;) {
+    for_list_my_next(Term *, term, self->terms) {
         Term_destruct(term);
         Term *next_term = term->next;
         free(term);
@@ -99,7 +99,7 @@ void SumOfProducts_construct(SumOfProducts *self) {
 }
 void SumOfProducts_destruct(SumOfProducts *self) {
     Variables_destruct(&self->variables);
-    for (Product *product = self->products; product != NULL;) {
+    for_list_my_next(Product *, product, self->products) {
         Product_destruct(product);
         Product *next_product = product->next;
         free(product);
