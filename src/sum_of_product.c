@@ -30,6 +30,32 @@ void Product_insert_term(Product *self, Term *term) {
     term->next = self->terms;
     self->terms = term;
 }
+void Product_fprint(Product *self, FILE *stream, Variables *variables, bool printed_after_other_products) {
+    bool first_term = true;
+
+    if (printed_after_other_products) {
+        fprintf(stream, " ");
+    }
+
+    if (self->coefficient == 1) {
+        if (printed_after_other_products) {
+            fprintf(stream, "+");
+        }
+    } else if (self->coefficient == -1) {
+        fprintf(stream, "-");
+    } else {
+        fprintf(stream, "%+ld", self->coefficient);
+        first_term = false;
+    }
+
+    for_list(Term *, term, self->terms) {
+        if (!first_term) {
+            fprintf(stream, "*");
+        }
+        String_fprint(&variables->data[term->variable_index], stream);
+        first_term = false;
+    }
+}
 
 void Variables_construct(Variables *self, size_t capcity) {
     self->capacity = capcity;
@@ -84,31 +110,8 @@ void SumOfProducts_insert_product(SumOfProducts *self, Product *product) {
 }
 void SumOfProducts_fprint(SumOfProducts *self, FILE *stream) {
     bool first_product = true;
-    for_list (Product *, product, self->products) {
-        bool first_term = true;
-
-        if (!first_product) {
-            fprintf(stream, " ");
-        }
-
-        if (product->coefficient == 1) {
-            if (!first_product) {
-                fprintf(stream, "+");
-            }
-        } else if (product->coefficient == -1) {
-            fprintf(stream, "-");
-        } else {
-            fprintf(stream, "%+ld", product->coefficient);
-            first_term = false;
-        }
-
-        for_list (Term *, term, product->terms) {
-            if (!first_term) {
-                fprintf(stream, "*");
-            }
-            String_fprint(&self->variables.data[term->variable_index], stream);
-            first_term = false;
-        }
+    for_list(Product *, product, self->products) {
+        Product_fprint(product, stream, &self->variables, !first_product);
 
         first_product = false;
     }

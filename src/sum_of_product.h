@@ -61,6 +61,7 @@ void Term_destruct(Term *self);
 void Product_construct(Product *self, long coefficient, Product *next_product);
 void Product_destruct(Product *self);
 void Product_insert_term(Product *self, Term *term);
+void Product_fprint(Product *self, FILE *stream, Variables *variables, bool printed_after_other_products);
 
 void Variables_construct(Variables *self, size_t capcity);
 void Variables_destruct(Variables *self);
