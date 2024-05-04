@@ -44,7 +44,9 @@ int main(void) {
         return 1;
     }
 
+#ifdef DEBUG_MAIN
     printf("Read (%s) %c (%s)\n", equation1, operation, equation2);
+#endif
 
     SumOfProducts sum1;
     SumOfProducts_construct(&sum1);
@@ -59,10 +61,13 @@ int main(void) {
         return 1;
     }
 
+#ifdef DEBUG_MAIN
+    printf("Parsed (");
     SumOfProducts_fprint(&sum1, stdout);
-    printf("\n");
+    printf(") %c (", operation);
     SumOfProducts_fprint(&sum2, stdout);
-    printf("\n");
+    printf(")\n");
+#endif
 
     SumOfProducts_destruct(&sum2);
     SumOfProducts_destruct(&sum1);
