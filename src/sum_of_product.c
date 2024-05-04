@@ -192,9 +192,14 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
 
     long *array_length_of_variables = malloc(self->variables.size * sizeof(long));
 
+    Product *original_self_products = self->products;
     for_list(Product *, product_other, other->products) {
         bool performed_operation = false;
-        for_list(Product *, product_self, self->products) {
+
+        // because all new products in the 'other' are unique
+        // we don't need to check the newly added products
+        // when adding any other product from 'other'
+        for_list(Product *, product_self, original_self_products) {
             if (Product_are_mapped_terms_equal(
                     product_self, product_other, self->variables.size, array_length_of_variables,
                     index_map
@@ -225,9 +230,6 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
             for_list(Term *, term, new_product->terms) {
                 term->variable_index = index_map[term->variable_index];
             }
-            // @Optimization because all new products in the 'other' are unique
-            // we don't need to check the newly added products
-            // when adding any other product from 'other'
             SumOfProducts_insert_product(self, new_product);
         }
     }
