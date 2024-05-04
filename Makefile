@@ -1,4 +1,5 @@
 CC = "$(shell (which clang 2>/dev/null || which gcc 2>/dev/null) | head -1)"
+PYTHON = "$(shell (which python3 2>/dev/null || which python 2>/dev/null) | head -1)"
 
 ifdef DEBUG
 	FLAGS = -g -fsanitize=address
@@ -13,6 +14,11 @@ SRCS = src/main.c src/sum_of_product.c
 .PHONY: com
 com:
 	$(CC) -o src/main.out $(SRCS) $(COMPATS) $(FLAGS)
+
+
+.PHONY: test
+test:
+	$(PYTHON) tests/run.py src/main.out
 
 
 .PHONY: clean
