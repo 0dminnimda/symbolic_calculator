@@ -83,12 +83,21 @@ def unify(output: str) -> list[tuple[int, list[str]]]:
     return sorted(result)
 
 
+STR_LIM = 1000
+
+
+def limit_str(s: str, limit: int) -> str:
+    if len(s) >= limit:
+        return s[:limit] + "..."
+    return s
+
+
 def compare_equation(relative_path: Path, expected_str: str, actual_str: str) -> bool:
     if expected_str != actual_str:
         first_line = f"=== Test failed: {relative_path} ==="
         print(RED + first_line + CLEAR)
-        print(f"Expected:\n{YELLOW}{expected_str}{CLEAR}")
-        print(f"Received:\n{YELLOW}{actual_str}{CLEAR}")
+        print(f"Expected:\n{YELLOW}{limit_str(expected_str, STR_LIM)}{CLEAR}")
+        print(f"Received:\n{YELLOW}{limit_str(actual_str, STR_LIM)}{CLEAR}")
         print(RED + "="*len(first_line) + CLEAR + "\n")
         return False
     else:
@@ -102,8 +111,10 @@ def compare_binary(relative_path: Path, expected_str: str, actual_str: str) -> b
     if expected != actual:
         first_line = f"=== Test failed: {relative_path} ==="
         print(RED + first_line + CLEAR)
-        print(f"Expected:\n{YELLOW}{expected_str}{CLEAR}")
-        print(f"Received:\n{YELLOW}{actual_str}{CLEAR}")
+        print(f"Expected:\n{YELLOW}{limit_str(expected_str, STR_LIM)}{CLEAR}")
+        print(f"Received:\n{YELLOW}{limit_str(actual_str, STR_LIM)}{CLEAR}")
+        expected = limit_str(str(expected), STR_LIM)
+        actual = limit_str(str(actual), STR_LIM)
         print(f"Hint {expected=} != {actual=}")
         print(RED + "="*len(first_line) + CLEAR + "\n")
         return False
