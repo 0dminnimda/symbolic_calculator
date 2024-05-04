@@ -3,11 +3,11 @@
 #ifndef SUM_OF_PRODUCT_H
 #define SUM_OF_PRODUCT_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 
 #include "sized_string.h"
-
 
 typedef struct Term {
     size_t variable_index;
@@ -65,6 +65,10 @@ void Product_fprint(
     Product *self, FILE *stream, Variables *variables, bool printed_after_other_products
 );
 void Product_insert_term(Product *self, Term *term);
+bool Product_are_terms_equal(
+    const Product *self, const Product *other, size_t length_of_variables,
+    long *array_length_of_variables
+);
 
 void Variables_construct(Variables *self, size_t capcity);
 void Variables_destruct(Variables *self);
@@ -75,5 +79,8 @@ void SumOfProducts_construct(SumOfProducts *self);
 void SumOfProducts_destruct(SumOfProducts *self);
 void SumOfProducts_fprint(SumOfProducts *self, FILE *stream);
 void SumOfProducts_insert_product(SumOfProducts *self, Product *product);
+Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_product);
+void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self);
+void SumOfProducts_add_destructive(SumOfProducts *self, SumOfProducts *other);
 
 #endif  // SUM_OF_PRODUCT_H

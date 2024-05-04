@@ -70,6 +70,22 @@ int main(void) {
     printf(")\n");
 #endif
 
+    switch (operation) {
+        case '+': {
+            SumOfProducts_add_destructive(&sum1, &sum2);
+            SumOfProducts_fprint(&sum1, stdout);
+            printf("\n");
+            break;
+        }
+        // case '=':
+        //     if (SumOfProducts_equals(&sum1, &sum2)) {
+        //         printf("equal\n");
+        //     } else {
+        //         printf("not equal\n");
+        //     }
+        default: printf("Operation not implemented '%c'\n", operation); break;
+    }
+
     SumOfProducts_destruct(&sum2);
     SumOfProducts_destruct(&sum1);
 

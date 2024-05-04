@@ -60,6 +60,20 @@ void Product_insert_term(Product *self, Term *term) {
     term->next = self->terms;
     self->terms = term;
 }
+bool Product_are_terms_equal(
+    const Product *self, const Product *other, size_t length_of_variables,
+    long *array_length_of_variables
+) {
+    memset(array_length_of_variables, 0, length_of_variables * sizeof(long));
+    for_list(Term *, term, self->terms) { array_length_of_variables[term->variable_index] += 1; }
+    for_list(Term *, term, other->terms) { array_length_of_variables[term->variable_index] -= 1; }
+    for (size_t i = 0; i < length_of_variables; i++) {
+        if (array_length_of_variables[i] != 0) {
+            return false;
+        }
+    }
+    return true;
+}
 
 void Variables_construct(Variables *self, size_t capcity) {
     self->capacity = capcity;
@@ -119,4 +133,76 @@ void SumOfProducts_fprint(SumOfProducts *self, FILE *stream) {
 void SumOfProducts_insert_product(SumOfProducts *self, Product *product) {
     product->next = self->products;
     self->products = product;
+}
+Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_product) {
+    /*
+    If we want to delete a product inbewteen the others - all good and usual.
+    But to make it simple to use, we want to handle the case when
+    the user want to delete the head product as the middlle.
+    In this case there's no previous product (it's NULL) and
+    also we have to work with the SOP as the holder of the head pointer.
+    */
+    if (prev_product == NULL) {
+        Product *product = self->products;
+        if (product == NULL) return NULL;
+
+        self->products = product->next;
+        Product_destruct(product);
+        free(product);
+        return self->products;
+    }
+
+    if (prev_product->next == NULL) return NULL;
+
+    Product *next = prev_product->next;
+    prev_product->next = next->next;
+    Product_destruct(next);
+    free(next);
+    return prev_product->next;
+}
+void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self) {
+    Product *prev_product = NULL;
+    for_list_my_next(Product *, product, self->products) {
+        Product *next_product;
+        if (product->coefficient == 0) {
+            next_product = SumOfProducts_remove_next_product(self, prev_product);
+        } else {
+            next_product = product->next;
+        }
+        prev_product = product;
+        product = next_product;
+    }
+}
+void SumOfProducts_add_destructive(SumOfProducts *self, SumOfProducts *other) {
+    size_t *index_map = malloc((self->variables.size + other->variables.size) * sizeof(size_t));
+    for (size_t i = 0; i < other->variables.size; ++i) {
+        index_map[i] = Variables_insert(&self->variables, &other->variables.data[i]);
+    }
+
+    // destructive: sets the other SOP's incides to be the same as self's
+    for_list(Product *, product, other->products) {
+        for_list(Term *, term, product->terms) {
+            term->variable_index = index_map[term->variable_index];
+        }
+    }
+
+    long *array_length_of_variables = malloc(self->variables.size * sizeof(long));
+
+    for_list(Product *, product1, self->products) {
+        for_list(Product *, product2, other->products) {
+            if (Product_are_terms_equal(
+                    product1, product2, self->variables.size, array_length_of_variables
+                )) {
+                product1->coefficient += product2->coefficient;
+                // canonical SOP don't contain repeating products with the same terms
+                // so we won't find anything further to add
+                break;
+            }
+        }
+    }
+
+    SumOfProducts_remove_zero_coefficient_products(self);
+
+    free(array_length_of_variables);
+    free(index_map);
 }
