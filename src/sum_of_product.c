@@ -139,6 +139,10 @@ void SumOfProducts_destruct(SumOfProducts *self) {
     }
 }
 void SumOfProducts_fprint(SumOfProducts *self, FILE *stream) {
+    if (self->products == NULL) {
+        fprintf(stream, "0");
+        return;
+    }
     bool first_product = true;
     for_list(Product *, product, self->products) {
         Product_fprint(product, stream, &self->variables, !first_product);
