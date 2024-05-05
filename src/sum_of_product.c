@@ -83,6 +83,9 @@ bool Product_are_mapped_terms_equal(
 ) {
     if (self->terms_count != other->terms_count) return false;
 
+    // We don't case about the order of variables,
+    // we only care that there is the same amount of them in each product
+    // so we just count the amount, veriables in self count up and in other - down
     memset(array_length_of_variables, 0, length_of_variables * sizeof(long));
     for_list(Term *, term, self->terms) { array_length_of_variables[term->variable_index] += 1; }
     for_list(Term *, term, other->terms) {
