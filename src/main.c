@@ -83,6 +83,14 @@ int main(void) {
             printf("\n");
             break;
         }
+        case '*': {
+            SumOfProducts result;
+            SumOfProducts_multiply(&sum1, &sum2, &result);
+            SumOfProducts_fprint(&result, stdout);
+            printf("\n");
+            SumOfProducts_destruct(&result);
+            break;
+        }
         case '=': {
             if (SumOfProducts_are_equal(&sum1, &sum2)) {
                 printf("equal\n");

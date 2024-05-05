@@ -61,32 +61,51 @@ void Product_fprint(
         first_term = false;
     }
 }
-void Product_copy(const Product *self, Product *copy) {
-    copy->terms_count = 0;
-    copy->next = NULL;
-    copy->coefficient = self->coefficient;
-    copy->terms = NULL;
-    for_list(Term *, term, self->terms) {
+const Term *Product_get_last_term_const(const Product *self) {
+    Term *last_term = NULL;
+    for_list(Term *, term, self->terms) { last_term = term; }
+    return last_term;
+}
+Term *Product_get_last_term(Product *self) {
+    return (Term *)Product_get_last_term_const((const Product *)self);
+}
+void Product_extend_from(Product *self, const Product *source) {
+    for_list(const Term *, term, source->terms) {
         Term *new_term = malloc(sizeof(Term));
         Term_copy(term, new_term);
-        Product_insert_term(copy, new_term);
+        Product_insert_term(self, new_term);
     }
+}
+void Product_copy(const Product *self, Product *copy) {
+    Product_construct(copy, self->coefficient);
+    Product_extend_from(copy, self);
 }
 void Product_insert_term(Product *self, Term *term) {
     term->next = self->terms;
     self->terms = term;
     ++self->terms_count;
 }
+void Product_multiply_mapped(
+    const Product *self, const Product *other, Product *result, const size_t *index_map_for_other
+) {
+    Product_copy(other, result);
+    result->coefficient *= self->coefficient;
+    for_list(Term *, term, result->terms) {
+        term->variable_index = index_map_for_other[term->variable_index];
+    }
+    Product_extend_from(result, self);
+}
 bool Product_are_mapped_terms_equal(
-    const Product *self, const Product *other, size_t variable_count,
-    long *variable_powers, const size_t *index_map_for_other
+    const Product *self, const Product *other, size_t variable_count, long *variable_powers,
+    const size_t *index_map_for_other
 ) {
     if (self->terms_count != other->terms_count) return false;
 
     // We don't case about the order of variables,
     // we only care that there is the same amount of them in each product
     // so we just count the amount, veriables in self count up and in other - down
-    // @XXX can we get read of this memset? will initializing the array using self->terms be better/feasable?
+    // @XXX can we get read of this memset? will initializing the array using self->terms be
+    // better/feasable?
     memset(variable_powers, 0, variable_count * sizeof(long));
 
     long unique_variable_count = 0;
@@ -144,6 +163,14 @@ size_t Variables_insert(Variables *self, const String *string) {
 
     String_copy(string, &self->data[self->size]);
     return self->size++;
+}
+void Variables_copy(const Variables *self, Variables *copy) {
+    copy->size = self->size;
+    copy->capacity = self->size;
+    copy->data = malloc(copy->capacity * sizeof(String));
+    for (size_t i = 0; i < self->size; ++i) {
+        String_copy(&self->data[i], &copy->data[i]);
+    }
 }
 
 void SumOfProducts_construct(SumOfProducts *self) {
@@ -214,6 +241,68 @@ void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self) {
         product = next_product;
     }
 }
+void SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
+    SumOfProducts *self, const Product *product_other, const Variables *other_variables, bool is_sub,
+    long *variable_powers, size_t *index_map, Product *self_products
+) {
+    bool performed_operation = false;
+#ifdef DEBUG_SOP
+    printf("From the first loop: ");
+    Product_fprint(product_other, stdout, other_variables, false);
+    printf("\n");
+#endif
+
+    for_list(Product *, product_self, self_products) {
+#ifdef DEBUG_SOP
+        printf("  From the second loop: ");
+        Product_fprint(product_self, stdout, &self->variables, false);
+        printf("\n");
+#endif
+
+        if (Product_are_mapped_terms_equal(
+                product_self, product_other, self->variables.size, variable_powers, index_map
+            )) {
+#ifdef DEBUG_SOP
+            printf("Matched two products:\n");
+            Product_fprint(product_self, stdout, &self->variables, false);
+            printf("\n");
+            Product_fprint(product_other, stdout, other_variables, false);
+            printf("\n");
+#endif
+            if (is_sub) {
+                product_self->coefficient -= product_other->coefficient;
+            } else {
+                product_self->coefficient += product_other->coefficient;
+            }
+            performed_operation = true;
+            // canonical SOP don't contain repeating products with the same terms
+            // so we won't find anything further to add
+            break;
+        }
+    }
+
+    // if we did not find anything to act upon -
+    // it means that the current term combination is not present in the self
+    // add it
+    if (!performed_operation) {
+#ifdef DEBUG_SOP
+        printf("Adding new product:\n");
+        Product_fprint(product_other, stdout, other_variables, false);
+        printf("\n");
+#endif
+        Product *new_product = malloc(sizeof(Product));
+        Product_copy(product_other, new_product);
+        if (is_sub) {
+            new_product->coefficient = -new_product->coefficient;
+        }
+        // since we don't act destructive, we did not map the indices previously
+        // we need to do it now instead, after the copy
+        for_list(Term *, term, new_product->terms) {
+            term->variable_index = index_map[term->variable_index];
+        }
+        SumOfProducts_insert_product(self, new_product);
+    }
+}
 void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *other, bool is_sub) {
     size_t *index_map = malloc((self->variables.size + other->variables.size) * sizeof(size_t));
     for (size_t i = 0; i < other->variables.size; ++i) {
@@ -224,73 +313,18 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
 
     Product *original_self_products = self->products;
     for_list(Product *, product_other, other->products) {
-        bool performed_operation = false;
-#ifdef DEBUG_SOP
-        printf("From the first loop: ");
-        Product_fprint(product_other, stdout, &other->variables, false);
-        printf("\n");
-#endif
-
         // because all new products in the 'other' are unique
         // we don't need to check the newly added products
         // when adding any other product from 'other'
-        for_list(Product *, product_self, original_self_products) {
-#ifdef DEBUG_SOP
-            printf("  From the second loop: ");
-            Product_fprint(product_self, stdout, &self->variables, false);
-            printf("\n");
-#endif
-
-            if (Product_are_mapped_terms_equal(
-                    product_self, product_other, self->variables.size, variable_powers,
-                    index_map
-                )) {
-#ifdef DEBUG_SOP
-                printf("Matched two products:\n");
-                Product_fprint(product_self, stdout, &self->variables, false);
-                printf("\n");
-                Product_fprint(product_other, stdout, &other->variables, false);
-                printf("\n");
-#endif
-                if (is_sub) {
-                    product_self->coefficient -= product_other->coefficient;
-                } else {
-                    product_self->coefficient += product_other->coefficient;
-                }
-                performed_operation = true;
-                // canonical SOP don't contain repeating products with the same terms
-                // so we won't find anything further to add
-                break;
-            }
-        }
-
-        // if we did not find anything to act upon -
-        // it means that the current term combination is not present in the self
-        // add it
-        if (!performed_operation) {
-#ifdef DEBUG_SOP
-            printf("Adding new product:\n");
-            Product_fprint(product_other, stdout, &other->variables, false);
-            printf("\n");
-#endif
-            Product *new_product = malloc(sizeof(Product));
-            Product_copy(product_other, new_product);
-            if (is_sub) {
-                new_product->coefficient = -new_product->coefficient;
-            }
-            // since we don't act destructive, we did not map the indices previously
-            // we need to do it now instead, after the copy
-            for_list(Term *, term, new_product->terms) {
-                term->variable_index = index_map[term->variable_index];
-            }
-            SumOfProducts_insert_product(self, new_product);
-        }
+        SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
+            self, product_other, &other->variables, is_sub, variable_powers, index_map,
+            original_self_products
+        );
     }
-
-    SumOfProducts_remove_zero_coefficient_products(self);
 
     // @FIXME after removing it's possible that we will have some unused strings
     // but for now i think it's fine to leave it that way
+    SumOfProducts_remove_zero_coefficient_products(self);
 
     free(variable_powers);
     free(index_map);
@@ -319,8 +353,7 @@ bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *oth
         for_list(Product *, product_other, other->products) {
             if (product_self->coefficient == product_other->coefficient &&
                 Product_are_mapped_terms_equal(
-                    product_self, product_other, self->variables.size, variable_powers,
-                    index_map
+                    product_self, product_other, self->variables.size, variable_powers, index_map
                 )) {
                 found_equal = true;
                 // canonical SOP don't contain repeating products with the same terms
@@ -338,4 +371,85 @@ bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *oth
     free(variable_powers);
     free(index_map);
     return result;
+}
+void SumOfProducts_multiply(
+    const SumOfProducts *self, const SumOfProducts *other, SumOfProducts *result
+) {
+    // @Optimization: 'self' and 'other' have shared products (S) and unique ones (U1, U2)
+    // Using this we can decompose multiplication into predictable mini-muplitiplications:
+    // (S + U1) * (S + U2) = S*S + S*(U1 + U2) + U1*U2
+    // 1. S*S looks like (a + b + ... z) * (a + b + ... z) =
+    //    = a*a + b*b + ... + z*z + 2*a*b + ... + 2*a*z + 2*b*z
+    //    and all of them are unique because S are unique (as well as 'self' or 'other')
+    // 2. (U1 + U2) are all also unique, since U1 and U2 are unique in set of all variables
+    //    S and (U1 + U2) also don't share common products, so each term is unique,
+    //    when it's added, no need to check if it exists
+    // 3. U1*U2  are all also unique, so we hae the same situation where each product
+    //    can be just added without checking
+    // Since all 3 operands are unique (since they are cartesian products of pairwise unique sets)
+    // So when adding those SOPs we can all the same just concatenate without checking
+
+    // Example:
+    // (S + U1) * (S + U2) = ((a + b) + (c)) * ((a + b) + (d)) =
+    // = a*a + 2*a*b + b*b  +  a*d + b*d + c*a + c*b  +  c*d =
+    // = (a * b) * (a * b)  +  d*(a + b) + c*(a + b)  +  c*d =
+    // = (a + b) * (a + b)  +  (a + b) * (c + d) + (c) * (d) =
+    // = S*S + S*(U1 + U2) + U1*U2
+
+    // For now though a simple algorithm is used
+    // - generate each possiple pair and add it to the total
+
+    SumOfProducts_construct(result);
+    Variables_copy(&self->variables, &result->variables);
+
+    size_t *index_map = malloc((result->variables.size + other->variables.size) * sizeof(size_t));
+    for (size_t i = 0; i < other->variables.size; ++i) {
+        index_map[i] = Variables_insert(&result->variables, &other->variables.data[i]);
+    }
+    // YUCK!!
+    size_t *identity_index_map = malloc(result->variables.size * sizeof(size_t));
+    for (size_t i = 0; i < result->variables.size; ++i) {
+        identity_index_map[i] = i;
+    }
+
+    long *variable_powers = malloc(result->variables.size * sizeof(long));
+
+    for_list(Product *, product_self, self->products) {
+#ifdef DEBUG_SOP
+        printf("From the first loop (mult): ");
+        Product_fprint(product_self, stdout, &self->variables, false);
+        printf("\n");
+#endif
+        for_list(Product *, product_other, other->products) {
+#ifdef DEBUG_SOP
+            printf("  From the second loop (mult): ");
+            Product_fprint(product_other, stdout, &other->variables, false);
+            printf("\n");
+#endif
+            Product new_product;
+            Product_multiply_mapped(product_self, product_other, &new_product, index_map);
+#ifdef DEBUG_SOP
+            printf("  New product in loop (mult): ");
+            Product_fprint(&new_product, stdout, &result->variables, false);
+            printf("\n");
+#endif
+            SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
+                result, &new_product, &result->variables, false, variable_powers, identity_index_map, result->products
+            );
+            Product_destruct(&new_product);
+#ifdef DEBUG_SOP
+            printf("  Total (mult): ");
+            SumOfProducts_fprint(result, stdout);
+            printf("\n");
+#endif
+        }
+    }
+
+    // @FIXME after removing it's possible that we will have some unused strings
+    // but for now i think it's fine to leave it that way
+    SumOfProducts_remove_zero_coefficient_products(result);
+
+    free(variable_powers);
+    free(identity_index_map);
+    free(index_map);
 }

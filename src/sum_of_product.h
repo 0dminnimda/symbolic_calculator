@@ -66,6 +66,9 @@ void Product_destruct(Product *self);
 void Product_fprint(
     const Product *self, FILE *stream, const Variables *variables, bool printed_after_other_products
 );
+Term *Product_get_last_term(Product *self);
+const Term *Product_get_last_term_const(const Product *self);
+void Product_extend_from(Product *self, const Product *source);
 void Product_copy(const Product *self, Product *copy);
 void Product_insert_term(Product *self, Term *term);
 bool Product_are_mapped_terms_equal(
@@ -77,6 +80,7 @@ void Variables_construct(Variables *self, size_t capcity);
 void Variables_destruct(Variables *self);
 size_t Variables_find(const Variables *self, const String *string);
 size_t Variables_insert(Variables *self, const String *string);
+void Variables_copy(const Variables *self, Variables *copy);
 
 void SumOfProducts_construct(SumOfProducts *self);
 void SumOfProducts_destruct(SumOfProducts *self);
@@ -86,5 +90,6 @@ Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_pr
 void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self);
 void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *other, bool is_sub);
 bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *other);
+void SumOfProducts_multiply(const SumOfProducts *self, const SumOfProducts *other, SumOfProducts *result);
 
 #endif  // SUM_OF_PRODUCT_H
