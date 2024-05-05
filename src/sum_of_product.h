@@ -69,8 +69,8 @@ void Product_fprint(
 void Product_copy(const Product *self, Product *copy);
 void Product_insert_term(Product *self, Term *term);
 bool Product_are_mapped_terms_equal(
-    const Product *self, const Product *other, size_t length_of_variables,
-    long *array_length_of_variables, const size_t *index_map_for_other
+    const Product *self, const Product *other, size_t variable_count,
+    long *variable_powers, const size_t *index_map_for_other
 );
 
 void Variables_construct(Variables *self, size_t capcity);

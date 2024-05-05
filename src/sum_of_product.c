@@ -78,21 +78,21 @@ void Product_insert_term(Product *self, Term *term) {
     ++self->terms_count;
 }
 bool Product_are_mapped_terms_equal(
-    const Product *self, const Product *other, size_t length_of_variables,
-    long *array_length_of_variables, const size_t *index_map_for_other
+    const Product *self, const Product *other, size_t variable_count,
+    long *variable_powers, const size_t *index_map_for_other
 ) {
     if (self->terms_count != other->terms_count) return false;
 
     // We don't case about the order of variables,
     // we only care that there is the same amount of them in each product
     // so we just count the amount, veriables in self count up and in other - down
-    memset(array_length_of_variables, 0, length_of_variables * sizeof(long));
-    for_list(Term *, term, self->terms) { array_length_of_variables[term->variable_index] += 1; }
+    memset(variable_powers, 0, variable_count * sizeof(long));
+    for_list(Term *, term, self->terms) { variable_powers[term->variable_index] += 1; }
     for_list(Term *, term, other->terms) {
-        array_length_of_variables[index_map_for_other[term->variable_index]] -= 1;
+        variable_powers[index_map_for_other[term->variable_index]] -= 1;
     }
-    for (size_t i = 0; i < length_of_variables; i++) {
-        if (array_length_of_variables[i] != 0) {
+    for (size_t i = 0; i < variable_count; i++) {
+        if (variable_powers[i] != 0) {
             return false;
         }
     }
@@ -207,7 +207,7 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
         index_map[i] = Variables_insert(&self->variables, &other->variables.data[i]);
     }
 
-    long *array_length_of_variables = malloc(self->variables.size * sizeof(long));
+    long *variable_powers = malloc(self->variables.size * sizeof(long));
 
     Product *original_self_products = self->products;
     for_list(Product *, product_other, other->products) {
@@ -229,7 +229,7 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
 #endif
 
             if (Product_are_mapped_terms_equal(
-                    product_self, product_other, self->variables.size, array_length_of_variables,
+                    product_self, product_other, self->variables.size, variable_powers,
                     index_map
                 )) {
 #ifdef DEBUG_SOP
@@ -279,7 +279,7 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
     // @FIXME after removing it's possible that we will have some unused strings
     // but for now i think it's fine to leave it that way
 
-    free(array_length_of_variables);
+    free(variable_powers);
     free(index_map);
 }
 bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *other) {
@@ -298,7 +298,7 @@ bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *oth
         index_map[i] = index;
     }
 
-    long *array_length_of_variables = malloc(self->variables.size * sizeof(long));
+    long *variable_powers = malloc(self->variables.size * sizeof(long));
 
     bool result = true;
     for_list(Product *, product_self, self->products) {
@@ -306,7 +306,7 @@ bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *oth
         for_list(Product *, product_other, other->products) {
             if (product_self->coefficient == product_other->coefficient &&
                 Product_are_mapped_terms_equal(
-                    product_self, product_other, self->variables.size, array_length_of_variables,
+                    product_self, product_other, self->variables.size, variable_powers,
                     index_map
                 )) {
                 found_equal = true;
@@ -322,7 +322,7 @@ bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *oth
         }
     }
 
-    free(array_length_of_variables);
+    free(variable_powers);
     free(index_map);
     return result;
 }
