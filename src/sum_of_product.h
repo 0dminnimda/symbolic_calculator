@@ -57,11 +57,11 @@ variables(...):
 #define for_list(type, item, list) for (type item = list; item != NULL; item = item->next)
 #define for_list_my_next(type, item, list) for (type item = list; item != NULL;)
 
-void Term_construct(Term *self, size_t variable_index, Term *next_term);
+void Term_construct(Term *self, size_t variable_index);
 void Term_destruct(Term *self);
 void Term_copy(const Term *self, Term *copy);
 
-void Product_construct(Product *self, long coefficient, Product *next_product);
+void Product_construct(Product *self, long coefficient);
 void Product_destruct(Product *self);
 void Product_fprint(
     const Product *self, FILE *stream, const Variables *variables, bool printed_after_other_products

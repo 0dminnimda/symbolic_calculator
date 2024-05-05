@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-void Term_construct(Term *self, size_t variable_index, Term *next_term) {
+void Term_construct(Term *self, size_t variable_index) {
     self->variable_index = variable_index;
-    self->next = next_term;
+    self->next = NULL;
 }
 void Term_destruct(Term *self) { (void)self; }
 void Term_copy(const Term *self, Term *copy) {
@@ -15,11 +15,11 @@ void Term_copy(const Term *self, Term *copy) {
     copy->next = NULL;
 }
 
-void Product_construct(Product *self, long coefficient, Product *next_product) {
+void Product_construct(Product *self, long coefficient) {
     self->coefficient = coefficient;
     self->terms = NULL;
     self->terms_count = 0;
-    self->next = next_product;
+    self->next = NULL;
 }
 void Product_destruct(Product *self) {
     for_list_my_next(Term *, term, self->terms) {

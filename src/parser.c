@@ -136,7 +136,7 @@ bool parse_product(Parser *parser, Product *result) {
         }
 
         Term *term = malloc(sizeof(Term));
-        Term_construct(term, -1, NULL);
+        Term_construct(term, -1);
         // If we saw that product with coeff = 0,
         // we still need to parse all individual terms,
         // but not add them to the product
@@ -192,7 +192,7 @@ bool parse_sum_of_product(Parser *parser, SumOfProducts *result) {
         }
 
         Product *product = malloc(sizeof(Product));
-        Product_construct(product, coefficient, NULL);
+        Product_construct(product, coefficient);
         if (!parse_product(parser, product)) {
 #ifdef DEBUG_PARSER
             printf("parse_sum_of_product, bad Product\n");
