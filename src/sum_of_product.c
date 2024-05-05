@@ -12,7 +12,7 @@ void Term_construct(Term *self, size_t variable_index, Term *next_term) {
 void Term_destruct(Term *self) { (void)self; }
 void Term_copy(Term *self, Term *copy) {
     copy->variable_index = self->variable_index;
-    self->next = NULL;
+    copy->next = NULL;
 }
 
 void Product_construct(Product *self, long coefficient, Product *next_product) {
@@ -63,7 +63,7 @@ void Product_fprint(
 }
 void Product_copy(Product *self, Product *copy) {
     copy->terms_count = 0;
-    self->next = NULL;
+    copy->next = NULL;
     copy->coefficient = self->coefficient;
     for_list(Term *, term, self->terms) {
         Term *new_term = malloc(sizeof(Term));
