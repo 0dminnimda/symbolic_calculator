@@ -159,22 +159,22 @@ Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_pr
     also we have to work with the SOP as the holder of the head pointer.
     */
     if (prev_product == NULL) {
-        Product *product = self->products;
-        if (product == NULL) return NULL;
+        Product *current = self->products;
+        if (current == NULL) return NULL;
 
-        self->products = product->next;
-        Product_destruct(product);
-        free(product);
+        self->products = current->next;
+        Product_destruct(current);
+        free(current);
         return self->products;
+    } else {
+        Product *current = prev_product->next;
+        if (current == NULL) return NULL;
+
+        prev_product->next = current->next;
+        Product_destruct(current);
+        free(current);
+        return prev_product->next;
     }
-
-    if (prev_product->next == NULL) return NULL;
-
-    Product *next = prev_product->next;
-    prev_product->next = next->next;
-    Product_destruct(next);
-    free(next);
-    return prev_product->next;
 }
 void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self) {
     Product *prev_product = NULL;
