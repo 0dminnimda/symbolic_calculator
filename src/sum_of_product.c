@@ -208,6 +208,11 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
     Product *original_self_products = self->products;
     for_list(Product *, product_other, other->products) {
         bool performed_operation = false;
+#ifdef DEBUG_SOP
+        printf("From the first loop: ");
+        Product_fprint(product_other, stdout, &other->variables, false);
+        printf("\n");
+#endif
 
         // because all new products in the 'other' are unique
         // we don't need to check the newly added products
@@ -217,6 +222,13 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
                     product_self, product_other, self->variables.size, array_length_of_variables,
                     index_map
                 )) {
+#ifdef DEBUG_SOP
+                printf("Matched two products:\n");
+                Product_fprint(product_self, stdout, &self->variables, false);
+                printf("\n");
+                Product_fprint(product_other, stdout, &other->variables, false);
+                printf("\n");
+#endif
                 if (is_sub) {
                     product_self->coefficient -= product_other->coefficient;
                 } else {
@@ -233,6 +245,11 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
         // it means that the current term combination is not present in the self
         // add it
         if (!performed_operation) {
+#ifdef DEBUG_SOP
+            printf("Adding new product:\n");
+            Product_fprint(product_other, stdout, &other->variables, false);
+            printf("\n");
+#endif
             Product *new_product = malloc(sizeof(Product));
             Product_copy(product_other, new_product);
             if (is_sub) {
