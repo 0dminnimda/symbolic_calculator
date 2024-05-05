@@ -130,6 +130,9 @@ OUTPUT_SEP = "$$OUTPUT$$\n"
 def do_test(exec_path: Path, path: Path, file: str, prepend_args: list[str]) -> bool:
     rest = file.partition(INPUT_SEP)[2]
     input, _, output = rest.partition(OUTPUT_SEP)
+    path.with_suffix(".input").write_text(input)
+    path.with_suffix(".output").write_text(output)
+    path.unlink()
     result = run_command(*prepend_args, exec_path, input=input)
     relative_path = path.relative_to(Path.cwd())
 
