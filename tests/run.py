@@ -12,13 +12,13 @@ YELLOW = "\033[33m"
 CLEAR = "\033[0m"
 
 
-def run_command(*args, input=None) -> subprocess.CompletedProcess:
+def run_command(*args, **kwargs) -> subprocess.CompletedProcess:
     return subprocess.run(
         [str(arg) for arg in args],
-        input=input,
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        **kwargs,
     )
 
 
@@ -123,27 +123,22 @@ def compare_binary(relative_path: Path, expected_str: str, actual_str: str) -> b
         return True
 
 
-INPUT_SEP = "$$INPUT$$\n"
-OUTPUT_SEP = "$$OUTPUT$$\n"
+def do_test(exec_path: Path, path: Path, prepend_args: list[str]) -> bool:
+    with path.open("r") as f:
+        command = f.read(1)
 
-
-def do_test(exec_path: Path, path: Path, file: str, prepend_args: list[str]) -> bool:
-    rest = file.partition(INPUT_SEP)[2]
-    input, _, output = rest.partition(OUTPUT_SEP)
-    path.with_suffix(".input").write_text(input)
-    path.with_suffix(".output").write_text(output)
-    path.unlink()
-    result = run_command(*prepend_args, exec_path, input=input)
+    result = run_command(*prepend_args, exec_path, stdin=path.open("rb"))
     relative_path = path.relative_to(Path.cwd())
 
-    if input[0] == "=":
+    output = path.with_suffix(".output").read_text()
+    if command[0] == "=":
         return compare_equation(relative_path, output, result.stdout)
     else:
         return compare_binary(relative_path, output, result.stdout)
 
 
 
-DEFAULT_PATTERNS = [str(DIR / "**/*.test")]
+DEFAULT_PATTERNS = [str(DIR / "**/*.input")]
 
 VALGRIND = False
 
@@ -162,7 +157,7 @@ def main(argv: list[str] = sys.argv) -> int:
 
     failed = 0
     for path in paths:
-        if not do_test(exec_path, path, path.read_text(), prepend_args):
+        if not do_test(exec_path, path, prepend_args):
             failed += 1
 
     if failed == 0:
