@@ -16,7 +16,7 @@ NAME_FILLER = string.digits + string.ascii_letters
 
 def random_name(bounds: tuple[int, int] = (5, 25)) -> str:
     return random_string((1, 1), string.ascii_letters) + random_string(
-        (bounds[0] - 1, bounds[1]), NAME_FILLER
+        (bounds[0] - 1, bounds[1] - 1), NAME_FILLER
     )
 
 
