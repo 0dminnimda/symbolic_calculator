@@ -27,6 +27,11 @@ valgrind:
 	printf "$(DATA)" | valgrind -s --leak-check=full ./src/main.out
 
 
+.PHONY: test_small
+test_small:
+	$(PYTHON) tests/run.py src/main.out tests/**/*.input !tests/**/big*_char.input
+
+
 .PHONY: test
 test:
 	$(PYTHON) tests/run.py src/main.out
