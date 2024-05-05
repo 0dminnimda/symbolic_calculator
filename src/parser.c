@@ -50,7 +50,7 @@ bool parse_long(Parser *parser, long *result) {
     return true;
 }
 
-bool parse_term(Parser *parser, Term *result) {
+bool parse_term(Parser *parser, Term *result, bool discard) {
     /*
         term: [a-zA-Z_][a-zA-Z0-9_]*
     */
@@ -67,6 +67,13 @@ bool parse_term(Parser *parser, Term *result) {
 
     for (; *parser->str != '\0'; ++parser->str) {
         if (!isalnum(*parser->str) && *parser->str != '_') break;
+    }
+
+    if (discard) {
+#ifdef DEBUG_PARSER
+        printf("parse_term: discard %.*s\n", (int)(parser->str - start), start);
+#endif
+        return true;
     }
 
     String variable;
@@ -130,7 +137,10 @@ bool parse_product(Parser *parser, Product *result) {
 
         Term *term = malloc(sizeof(Term));
         Term_construct(term, -1, NULL);
-        if (!parse_term(parser, term)) {
+        // If we saw that product with coeff = 0,
+        // we still need to parse all individual terms,
+        // but not add them to the product
+        if (!parse_term(parser, term, result->coefficient == 0)) {
 #ifdef DEBUG_PARSER
             printf("parse_product, bad Term\n");
 #endif
@@ -138,7 +148,15 @@ bool parse_product(Parser *parser, Product *result) {
             free(term);
             return false;
         }
-        Product_insert_term(result, term);
+        if (result->coefficient == 0) {
+#ifdef DEBUG_PARSER
+            printf("parse_product: result->coefficient == 0\n");
+#endif
+            Term_destruct(term);
+            free(term);
+        } else {
+            Product_insert_term(result, term);
+        }
 
         first = false;
     }
@@ -183,7 +201,17 @@ bool parse_sum_of_product(Parser *parser, SumOfProducts *result) {
             free(product);
             return false;
         }
-        SumOfProducts_insert_product(result, product);
+        // If we parsed a product with coeff = 0,
+        // we just don't add it to the sum
+        if (product->coefficient == 0) {
+#ifdef DEBUG_PARSER
+            printf("parse_sum_of_product: product->coefficient == 0\n");
+#endif
+            Product_destruct(product);
+            free(product);
+        } else {
+            SumOfProducts_insert_product(result, product);
+        }
 
         first = false;
     }
