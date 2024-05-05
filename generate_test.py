@@ -21,13 +21,14 @@ def random_name(bounds: tuple[int, int] = (5, 25)) -> str:
 
 
 SPACE_BOUNDS = (0, 25)
+NAME_BOUNDS = (5, 25)
 TERMS_BOUNDS = (0, 100)
 VAR_BOUNDS = (50, 100)
 PROD_BOUNDS = (50, 100)
 NUMBER_BOUNDS = (int(-1e-10), int(1e10))
 
 
-variables = [random_name() for _ in range(random.randint(*VAR_BOUNDS))]
+variables = [random_name(NAME_BOUNDS) for _ in range(random.randint(*VAR_BOUNDS))]
 
 products = list({
     tuple(sorted(random.choices(variables, k=random.randint(*TERMS_BOUNDS))))
