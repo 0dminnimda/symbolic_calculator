@@ -79,7 +79,6 @@ bool parse_term(Parser *parser, Term *result, bool discard) {
     String variable;
     // it's ok to remove constness from start, Variables_insert does not modify the string
     String_construct_slice(&variable, (char *)start, parser->str - start);
-    // (void)String_hash(&variable); // AWFULL!!
 #ifdef DEBUG_PARSER
     printf("parse_term, matched '");
     String_fprint(&variable, stdout);
@@ -156,7 +155,7 @@ bool parse_product(Parser *parser, Product *result) {
             Term_destruct(term);
             free(term);
         } else {
-            Product_insert_term(result, &parser->sop->variables, term);
+            Product_insert_term(result, term);
         }
 
         first = false;
