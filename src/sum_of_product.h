@@ -59,14 +59,14 @@ variables(...):
 
 void Term_construct(Term *self, size_t variable_index, Term *next_term);
 void Term_destruct(Term *self);
-void Term_copy(Term *self, Term *copy);
+void Term_copy(const Term *self, Term *copy);
 
 void Product_construct(Product *self, long coefficient, Product *next_product);
 void Product_destruct(Product *self);
 void Product_fprint(
     const Product *self, FILE *stream, const Variables *variables, bool printed_after_other_products
 );
-void Product_copy(Product *self, Product *copy);
+void Product_copy(const Product *self, Product *copy);
 void Product_insert_term(Product *self, Term *term);
 bool Product_are_mapped_terms_equal(
     const Product *self, const Product *other, size_t length_of_variables,
@@ -80,7 +80,7 @@ size_t Variables_insert(Variables *self, const String *string);
 
 void SumOfProducts_construct(SumOfProducts *self);
 void SumOfProducts_destruct(SumOfProducts *self);
-void SumOfProducts_fprint(SumOfProducts *self, FILE *stream);
+void SumOfProducts_fprint(const SumOfProducts *self, FILE *stream);
 void SumOfProducts_insert_product(SumOfProducts *self, Product *product);
 Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_product);
 void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self);

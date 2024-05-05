@@ -10,7 +10,7 @@ void Term_construct(Term *self, size_t variable_index, Term *next_term) {
     self->next = next_term;
 }
 void Term_destruct(Term *self) { (void)self; }
-void Term_copy(Term *self, Term *copy) {
+void Term_copy(const Term *self, Term *copy) {
     copy->variable_index = self->variable_index;
     copy->next = NULL;
 }
@@ -61,7 +61,7 @@ void Product_fprint(
         first_term = false;
     }
 }
-void Product_copy(Product *self, Product *copy) {
+void Product_copy(const Product *self, Product *copy) {
     copy->terms_count = 0;
     copy->next = NULL;
     copy->coefficient = self->coefficient;
@@ -142,7 +142,7 @@ void SumOfProducts_destruct(SumOfProducts *self) {
         product = next_product;
     }
 }
-void SumOfProducts_fprint(SumOfProducts *self, FILE *stream) {
+void SumOfProducts_fprint(const SumOfProducts *self, FILE *stream) {
     if (self->products == NULL) {
         fprintf(stream, "0");
         return;
