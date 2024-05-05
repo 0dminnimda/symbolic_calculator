@@ -25,7 +25,7 @@ void String_copy(const String *self, String *copy) {
     String_construct_known_length(copy, self->data, self->length);
 }
 int String_fprint(const String *self, FILE *stream) {
-    fprintf(stream, "%*s", (int)self->length, self->data);
+    fprintf(stream, "%.*s", (int)self->length, self->data);
     return 0;
 }
 int String_compare(const String *self, const String *other) {
