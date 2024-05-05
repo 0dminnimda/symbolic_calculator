@@ -145,10 +145,10 @@ DEFAULT_PATTERNS = [str(DIR / "**/*.test")]
 VALGRIND = False
 
 
-def main(argv: list[str] = sys.argv) -> None:
+def main(argv: list[str] = sys.argv) -> int:
     if len(argv) == 1:
         print(f"Usage: {argv[0]} <EXEC> <PATTERN ...>")
-        exit(1)
+        return 1
 
     prepend_args = []
     if VALGRIND:
@@ -164,13 +164,16 @@ def main(argv: list[str] = sys.argv) -> None:
 
     if failed == 0:
         print(f"\n{GREEN}All {len(paths)} tests passed!{CLEAR}")
+        return 0
     else:
         print(f"\n{RED}Some tests failed {failed}/{len(paths)}{CLEAR}")
+        return 1
 
 
 if __name__ == "__main__":
     try:
-        main()
+        exit(main())
     except KeyboardInterrupt:
         print()
         print(RED + "Got KeyboardInterrupt, exiting" + CLEAR)
+        exit(1)
