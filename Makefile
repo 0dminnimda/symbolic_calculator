@@ -1,8 +1,6 @@
 CC = "$(shell (which clang 2>/dev/null || which gcc 2>/dev/null) | head -1)"
 PYTHON = "$(shell (which python3 2>/dev/null || which python 2>/dev/null) | head -1)"
 
-# -fsanitize=memory
-# -fsanitize=address
 ifeq ($(DEBUG),2)
     FLAGS = -gdwarf-4 -DDEBUG_MAIN -DDEBUG_PARSER -DDEBUG_SOP
 else ifeq ($(DEBUG),1)
@@ -11,6 +9,8 @@ else
     FLAGS =
 endif
 
+# -fsanitize=memory
+# -fsanitize=address
 
 COMPATS = src/compatibility/read_line.c src/compatibility/string.c
 SRCS = src/main.c src/sum_of_product.c src/sized_string.c
