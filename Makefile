@@ -1,5 +1,6 @@
 CC = "$(shell (which clang 2>/dev/null || which gcc 2>/dev/null) | head -1)"
 PYTHON = "$(shell (which python3 2>/dev/null || which python 2>/dev/null) | head -1)"
+O = 3
 
 ifeq ($(DEBUG),2)
     FLAGS = -gdwarf-4 -DDEBUG_MAIN -DDEBUG_PARSER -DDEBUG_SOP
@@ -18,7 +19,7 @@ DATA =
 
 .PHONY: com
 com:
-	$(CC) -o src/main.out -pedantic -Wall -Wextra $(SRCS) $(COMPATS) $(FLAGS)
+	$(CC) -o src/main.out -pedantic -Wall -Wextra -O$(O) $(SRCS) $(COMPATS) $(FLAGS)
 
 
 .PHONY: valgrind
