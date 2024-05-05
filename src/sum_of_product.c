@@ -30,7 +30,7 @@ void Product_destruct(Product *self) {
     }
 }
 void Product_fprint(
-    Product *self, FILE *stream, Variables *variables, bool printed_after_other_products
+    const Product *self, FILE *stream, const Variables *variables, bool printed_after_other_products
 ) {
     bool first_term = true;
 

@@ -64,7 +64,7 @@ void Term_copy(Term *self, Term *copy);
 void Product_construct(Product *self, long coefficient, Product *next_product);
 void Product_destruct(Product *self);
 void Product_fprint(
-    Product *self, FILE *stream, Variables *variables, bool printed_after_other_products
+    const Product *self, FILE *stream, const Variables *variables, bool printed_after_other_products
 );
 void Product_copy(Product *self, Product *copy);
 void Product_insert_term(Product *self, Term *term);
