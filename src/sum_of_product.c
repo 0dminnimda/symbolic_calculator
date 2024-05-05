@@ -184,8 +184,8 @@ void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self) {
             next_product = SumOfProducts_remove_next_product(self, prev_product);
         } else {
             next_product = product->next;
+            prev_product = product;
         }
-        prev_product = product;
         product = next_product;
     }
 }
