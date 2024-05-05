@@ -65,6 +65,7 @@ void Product_copy(const Product *self, Product *copy) {
     copy->terms_count = 0;
     copy->next = NULL;
     copy->coefficient = self->coefficient;
+    copy->terms = NULL;
     for_list(Term *, term, self->terms) {
         Term *new_term = malloc(sizeof(Term));
         Term_copy(term, new_term);
