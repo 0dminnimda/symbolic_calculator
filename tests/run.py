@@ -3,6 +3,7 @@ import sys
 import subprocess
 from pathlib import Path
 from glob import iglob
+from typing import Iterable
 
 DIR = Path(__file__).parent
 
@@ -22,11 +23,14 @@ def run_command(*args, **kwargs) -> subprocess.CompletedProcess:
     )
 
 
-def resolve_patterns(patterns: list[str]) -> list[Path]:
+def resolve_patterns(patterns: Iterable[str | Path]) -> list[Path]:
     include = set()
     ignore = set()
 
     for pattern in patterns:
+        if not isinstance(pattern, str):
+            pattern = str(pattern)
+
         is_negative = pattern.startswith("!")
         if is_negative:
             pattern = pattern[1:]
@@ -138,7 +142,7 @@ def do_test(exec_path: Path, path: Path, prepend_args: list[str]) -> bool:
 
 
 
-DEFAULT_PATTERNS = [str(DIR / "**/*.input")]
+DEFAULT_PATTERNS = [DIR / "**/*.input"]
 
 VALGRIND = False
 
