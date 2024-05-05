@@ -86,17 +86,30 @@ bool Product_are_mapped_terms_equal(
     // We don't case about the order of variables,
     // we only care that there is the same amount of them in each product
     // so we just count the amount, veriables in self count up and in other - down
+    // @XXX can we get read of this memset? will initializing the array using self->terms be better/feasable?
     memset(variable_powers, 0, variable_count * sizeof(long));
-    for_list(Term *, term, self->terms) { variable_powers[term->variable_index] += 1; }
+
+    long unique_variable_count = 0;
+    for_list(Term *, term, self->terms) {
+        long *power = &variable_powers[term->variable_index];
+        if (*power == 0) ++unique_variable_count;
+        *power += 1;
+    }
+
     for_list(Term *, term, other->terms) {
-        variable_powers[index_map_for_other[term->variable_index]] -= 1;
+        long *power = &variable_powers[index_map_for_other[term->variable_index]];
+        // If we are trying to decrease something that is already 0
+        // => there's more of this variable in 'other'
+        if (*power == 0) return false;
+        *power -= 1;
+        // If we hit 0 here, it means that the powers canceled out,
+        // and the case where the power will get negative is handled above
+        if (*power == 0) --unique_variable_count;
     }
-    for (size_t i = 0; i < variable_count; i++) {
-        if (variable_powers[i] != 0) {
-            return false;
-        }
-    }
-    return true;
+
+    // If we canceled the same amount of unique variables we starting with
+    // it means that the product terms are the same
+    return unique_variable_count == 0;
 }
 
 void Variables_construct(Variables *self, size_t capcity) {
