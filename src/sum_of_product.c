@@ -19,6 +19,7 @@ void Product_construct(Product *self, long coefficient) {
     self->coefficient = coefficient;
     self->terms = NULL;
     self->terms_count = 0;
+    self->terms_hash = 0;
     self->next = NULL;
 }
 void Product_destruct(Product *self) {
@@ -61,27 +62,34 @@ void Product_fprint(
         first_term = false;
     }
 }
-void Product_copy(const Product *self, Product *copy) {
+void Product_copy(const Product *self, const Variables *variables, Product *copy) {
     copy->terms_count = 0;
     copy->next = NULL;
+    copy->terms_hash = self->terms_hash;
     copy->coefficient = self->coefficient;
     copy->terms = NULL;
     for_list(Term *, term, self->terms) {
         Term *new_term = malloc(sizeof(Term));
         Term_copy(term, new_term);
-        Product_insert_term(copy, new_term);
+        Product_insert_term(copy, variables, new_term);
     }
 }
-void Product_insert_term(Product *self, Term *term) {
+void Product_insert_term(Product *self, const Variables *variables, Term *term) {
     term->next = self->terms;
     self->terms = term;
     ++self->terms_count;
+    // We only care about the set of the element - so the order of terms don't matter,
+    // so we can use the simplest way to combine hashes that ignores order - addition.
+    // Also this way we save the work for multiplication - we don't need to recalculate the hash,
+    // just add existing ones. (and that's why we hash the strings not the incides)
+    self->terms_hash += String_hash(&variables->data[term->variable_index]);
 }
 bool Product_are_mapped_terms_equal(
     const Product *self, const Product *other, size_t length_of_variables,
     long *array_length_of_variables, const size_t *index_map_for_other
 ) {
     if (self->terms_count != other->terms_count) return false;
+    if (self->terms_hash != other->terms_hash) return false;
 
     // We don't case about the order of variables,
     // we only care that there is the same amount of them in each product
@@ -261,7 +269,7 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
             printf("\n");
 #endif
             Product *new_product = malloc(sizeof(Product));
-            Product_copy(product_other, new_product);
+            Product_copy(product_other, &other->variables, new_product);
             if (is_sub) {
                 new_product->coefficient = -new_product->coefficient;
             }

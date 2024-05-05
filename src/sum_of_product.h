@@ -18,6 +18,7 @@ typedef struct Product {
     long coefficient;
     Term *terms;
     size_t terms_count;
+    size_t terms_hash;
     struct Product *next;
 } Product;
 
@@ -66,8 +67,8 @@ void Product_destruct(Product *self);
 void Product_fprint(
     const Product *self, FILE *stream, const Variables *variables, bool printed_after_other_products
 );
-void Product_copy(const Product *self, Product *copy);
-void Product_insert_term(Product *self, Term *term);
+void Product_copy(const Product *self, const Variables *variables, Product *copy);
+void Product_insert_term(Product *self, const Variables *variables, Term *term);
 bool Product_are_mapped_terms_equal(
     const Product *self, const Product *other, size_t length_of_variables,
     long *array_length_of_variables, const size_t *index_map_for_other
