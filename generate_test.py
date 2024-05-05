@@ -1,5 +1,7 @@
+import sys
 import string
 import random
+from pathlib import Path
 
 
 WHITESPACE = " \t"
@@ -63,18 +65,17 @@ def generate_add_sub(is_sub: bool):
         else:
             result_coeffs[i] = a + b
 
-    result: list[str] = []
-    result.append("$$INPUT$$\n")
-    result.append("-" if is_sub else "+")
-    result.append("\n")
+    input_s: list[str] = []
+    input_s.append("-" if is_sub else "+")
+    input_s.append("\n")
 
     for coefficients in (coefficients1, coefficients2):
-        print_coefficients(result, coefficients)
+        print_coefficients(input_s, coefficients)
 
-    result.append("$$OUTPUT$$\n")
-    print_coefficients(result, result_coeffs)
+    output_s: list[str] = []
+    print_coefficients(output_s, result_coeffs)
 
-    return "".join(result)
+    return "".join(input_s), "".join(output_s)
 
 
 def generate_equality(equal: bool):
@@ -84,20 +85,27 @@ def generate_equality(equal: bool):
     else:
         coefficients2 = [random.randint(*NUMBER_BOUNDS) for _ in range(len(products))]
 
-    result: list[str] = []
-    result.append("$$INPUT$$\n")
-    result.append("=")
-    result.append("\n")
+    input_s: list[str] = []
+    input_s.append("=")
+    input_s.append("\n")
 
     for coefficients in (coefficients1, coefficients2):
-        print_coefficients(result, coefficients)
+        print_coefficients(input_s, coefficients)
 
-    result.append("$$OUTPUT$$\n")
-    result.append("equal" if equal else "not equal")
-    result.append("\n")
+    output_s: list[str] = []
+    output_s.append("equal" if equal else "not equal")
+    output_s.append("\n")
 
-    return "".join(result)
+    return "".join(input_s), "".join(output_s)
 
 
-# print(end=generate_add_sub(True))
-print(end=generate_equality(True))
+
+# input_s, output_s = generate_add_sub(True)
+input_s, output_s = generate_equality(True)
+
+if len(sys.argv) <= 1:
+    print(f"USAGE: {sys.argv[0]} <file>")
+    exit(1)
+
+Path(sys.argv[1]).with_suffix(".input").write_text(input_s)
+Path(sys.argv[1]).with_suffix(".output").write_text(output_s)
