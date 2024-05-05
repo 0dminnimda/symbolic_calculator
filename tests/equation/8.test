@@ -1,6 +1,0 @@
-$$INPUT$$
-=
-a - b + 1*c - 1*d
-- b - d + c + a
-$$OUTPUT$$
-equal

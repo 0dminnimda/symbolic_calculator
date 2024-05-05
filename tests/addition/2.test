@@ -1,6 +1,0 @@
-$$INPUT$$
-+
-t + x + y + z
-z + y - x + t
-$$OUTPUT$$
-2*z + 2*y + 2*t
