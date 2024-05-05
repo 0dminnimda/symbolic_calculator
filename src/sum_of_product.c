@@ -218,6 +218,12 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
         // we don't need to check the newly added products
         // when adding any other product from 'other'
         for_list(Product *, product_self, original_self_products) {
+#ifdef DEBUG_SOP
+            printf("  From the second loop: ");
+            Product_fprint(product_self, stdout, &self->variables, false);
+            printf("\n");
+#endif
+
             if (Product_are_mapped_terms_equal(
                     product_self, product_other, self->variables.size, array_length_of_variables,
                     index_map
