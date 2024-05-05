@@ -4,9 +4,6 @@ import random
 from pathlib import Path
 
 
-WHITESPACE = " \t"
-
-
 def random_string(
     bounds: tuple[int, int] = (5, 25), alphabet: str = string.printable
 ) -> str:
@@ -99,6 +96,7 @@ def generate_equality(equal: bool):
     return "".join(input_s), "".join(output_s)
 
 
+WHITESPACE = " "
 
 # input_s, output_s = generate_add_sub(True)
 input_s, output_s = generate_equality(True)
