@@ -35,4 +35,4 @@ finish:
     return buf;
 }
 
-char *read_line() { return fread_line(stdin); }
+char *read_line(void) { return fread_line(stdin); }
