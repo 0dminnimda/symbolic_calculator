@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -20,17 +21,17 @@ const char *skip_whitespaces(const char *str) {
     return str;
 }
 
-bool parse_long(Parser *parser, long *result) {
+bool parse_i64(Parser *parser, int64_t *result) {
     /*
-        long: [0-9]+
+        i64: [0-9]+
     */
 
     char *endptr = NULL;
-    long value = strtol(parser->str, &endptr, 10);
+    int64_t value = strtoll(parser->str, &endptr, 10);
 
     if (endptr == parser->str) {
 #ifdef DEBUG_PARSER
-        printf("parse_long: didn't parse a thing\n");
+        printf("parse_i64: didn't parse a thing\n");
 #endif
         return false;
     }
@@ -40,7 +41,7 @@ bool parse_long(Parser *parser, long *result) {
     // }
     if (errno == ERANGE) {
 #ifdef DEBUG_PARSER
-        fprintf(stderr, "The number is out of range for a long\n");
+        fprintf(stderr, "The number is out of range for a i64\n");
 #endif
         return false;
     }
@@ -92,7 +93,7 @@ bool parse_term(Parser *parser, Term *result, bool discard) {
 
 bool parse_product(Parser *parser, Product *result) {
     /*
-        product: (long '*')? term ('*' term)*
+        product: (i64 '*')? term ('*' term)*
     */
     parser->str = skip_whitespaces(parser->str);
     if (*parser->str == '\0') {
@@ -103,13 +104,13 @@ bool parse_product(Parser *parser, Product *result) {
     }
 
     bool first = true;
-    long coefficient = 1;
-    if (parse_long(parser, &coefficient)) {
+    int64_t coefficient = 1;
+    if (parse_i64(parser, &coefficient)) {
         first = false;
     }
 #ifdef DEBUG_PARSER
     else {
-        printf("parse_product, no parse_long for '%s'\n", parser->str);
+        printf("parse_product, no parse_i64 for '%s'\n", parser->str);
     }
 #endif
     result->coefficient *= coefficient;
@@ -177,7 +178,7 @@ bool parse_sum_of_product(Parser *parser, SumOfProducts *result) {
             break;
         }
 
-        long coefficient = 1;
+        int64_t coefficient = 1;
         if (*parser->str == '-') {
             coefficient = -1;
             ++parser->str;

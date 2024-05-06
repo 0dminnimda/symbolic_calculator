@@ -15,7 +15,7 @@ void Term_copy(const Term *self, Term *copy) {
     copy->next = NULL;
 }
 
-void Product_construct(Product *self, long coefficient) {
+void Product_construct(Product *self, int64_t coefficient) {
     self->coefficient = coefficient;
     self->terms = NULL;
     self->terms_count = 0;
@@ -52,9 +52,9 @@ void Product_fprint(
         }
     } else {
         if (printed_after_other_products) {
-            fprintf(stream, "%+ld", self->coefficient);
+            fprintf(stream, "%+lld", self->coefficient);
         } else {
-            fprintf(stream, "%ld", self->coefficient);
+            fprintf(stream, "%lld", self->coefficient);
         }
         first_term = false;
     }
@@ -102,7 +102,7 @@ void Product_multiply_mapped(
     Product_extend_from(result, self);
 }
 bool Product_are_terms_equal(
-    const Product *self, const Product *other, size_t variable_count, long *variable_powers
+    const Product *self, const Product *other, size_t variable_count, int64_t *variable_powers
 ) {
     if (self->terms_count != other->terms_count) return false;
 
@@ -111,17 +111,17 @@ bool Product_are_terms_equal(
     // so we just count the amount, veriables in self count up and in other - down
     // @XXX can we get read of this memset? will initializing the array using self->terms be
     // better/feasable?
-    memset(variable_powers, 0, variable_count * sizeof(long));
+    memset(variable_powers, 0, variable_count * sizeof(int64_t));
 
-    long unique_variable_count = 0;
+    int64_t unique_variable_count = 0;
     for_list(Term *, term, self->terms) {
-        long *power = &variable_powers[term->variable_index];
+        int64_t *power = &variable_powers[term->variable_index];
         if (*power == 0) ++unique_variable_count;
         *power += 1;
     }
 
     for_list(Term *, term, other->terms) {
-        long *power = &variable_powers[term->variable_index];
+        int64_t *power = &variable_powers[term->variable_index];
         // If we are trying to decrease something that is already 0
         // => there's more of this variable in 'other'
         if (*power == 0) return false;
@@ -136,7 +136,7 @@ bool Product_are_terms_equal(
     return unique_variable_count == 0;
 }
 bool Product_are_mapped_terms_equal(
-    const Product *self, const Product *other, size_t variable_count, long *variable_powers,
+    const Product *self, const Product *other, size_t variable_count, int64_t *variable_powers,
     const size_t *index_map_for_other
 ) {
     if (self->terms_count != other->terms_count) return false;
@@ -146,17 +146,17 @@ bool Product_are_mapped_terms_equal(
     // so we just count the amount, veriables in self count up and in other - down
     // @XXX can we get read of this memset? will initializing the array using self->terms be
     // better/feasable?
-    memset(variable_powers, 0, variable_count * sizeof(long));
+    memset(variable_powers, 0, variable_count * sizeof(int64_t));
 
-    long unique_variable_count = 0;
+    int64_t unique_variable_count = 0;
     for_list(Term *, term, self->terms) {
-        long *power = &variable_powers[term->variable_index];
+        int64_t *power = &variable_powers[term->variable_index];
         if (*power == 0) ++unique_variable_count;
         *power += 1;
     }
 
     for_list(Term *, term, other->terms) {
-        long *power = &variable_powers[index_map_for_other[term->variable_index]];
+        int64_t *power = &variable_powers[index_map_for_other[term->variable_index]];
         // If we are trying to decrease something that is already 0
         // => there's more of this variable in 'other'
         if (*power == 0) return false;
@@ -282,7 +282,7 @@ void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self) {
     }
 }
 void SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
-    SumOfProducts *self, const Product *product_other, bool is_sub, long *variable_powers,
+    SumOfProducts *self, const Product *product_other, bool is_sub, int64_t *variable_powers,
     size_t *index_map, Product *self_products
 ) {
     bool performed_operation = false;
@@ -320,7 +320,7 @@ void SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
     }
 }
 void SumOfProducts_inplace_add_Product_preallocated_owning(
-    SumOfProducts *self, Product *product_other, long *variable_powers, Product *self_products
+    SumOfProducts *self, Product *product_other, int64_t *variable_powers, Product *self_products
 ) {
     bool performed_operation = false;
     for_list(Product *, product_self, self_products) {
@@ -352,7 +352,7 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
         index_map[i] = Variables_insert(&self->variables, &other->variables.data[i]);
     }
 
-    long *variable_powers = malloc(self->variables.size * sizeof(long));
+    int64_t *variable_powers = malloc(self->variables.size * sizeof(int64_t));
 
     Product *original_self_products = self->products;
     for_list(Product *, product_other, other->products) {
@@ -387,7 +387,7 @@ bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *oth
         index_map[i] = index;
     }
 
-    long *variable_powers = malloc(self->variables.size * sizeof(long));
+    int64_t *variable_powers = malloc(self->variables.size * sizeof(int64_t));
 
     bool result = true;
     for_list(Product *, product_self, self->products) {
@@ -439,7 +439,7 @@ void SumOfProducts_multiply(
         index_map[i] = Variables_insert(&result->variables, &other->variables.data[i]);
     }
 
-    long *variable_powers = malloc(result->variables.size * sizeof(long));
+    int64_t *variable_powers = malloc(result->variables.size * sizeof(int64_t));
 
     for_list(Product *, product_self, self->products) {
         for_list(Product *, product_other, other->products) {

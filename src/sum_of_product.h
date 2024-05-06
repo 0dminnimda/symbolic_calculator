@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #include "sized_string.h"
@@ -15,7 +16,7 @@ typedef struct Term {
 } Term;
 
 typedef struct Product {
-    long coefficient;
+    int64_t coefficient;
     Term *terms;
     size_t terms_count;
     struct Product *next;
@@ -61,7 +62,7 @@ void Term_construct(Term *self, size_t variable_index);
 void Term_destruct(Term *self);
 void Term_copy(const Term *self, Term *copy);
 
-void Product_construct(Product *self, long coefficient);
+void Product_construct(Product *self, int64_t coefficient);
 void Product_destruct(Product *self);
 void Product_fprint(
     const Product *self, FILE *stream, const Variables *variables, bool printed_after_other_products
@@ -73,11 +74,11 @@ void Product_copy(const Product *self, Product *copy);
 void Product_insert_term(Product *self, Term *term);
 bool Product_are_terms_equal(
     const Product *self, const Product *other, size_t variable_count,
-    long *variable_powers
+    int64_t *variable_powers
 );
 bool Product_are_mapped_terms_equal(
     const Product *self, const Product *other, size_t variable_count,
-    long *variable_powers, const size_t *index_map_for_other
+    int64_t *variable_powers, const size_t *index_map_for_other
 );
 
 void Variables_construct(Variables *self, size_t capcity);
