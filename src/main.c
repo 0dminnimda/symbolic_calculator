@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "compatibility/read_line.h"
-#include "parser.c"
+#include "parser.h"
 #include "sum_of_product.h"
 
 bool parse_sum_of_product_with_errors(const char *str, SumOfProducts *result) {

@@ -19,7 +19,7 @@ endif
 # -fsanitize=address
 
 COMPATS = src/compatibility/read_line.c src/compatibility/string.c
-SRCS = src/main.c src/sum_of_product.c src/sized_string.c
+SRCS = src/main.c src/parser.c src/sum_of_product.c src/sized_string.c 
 DATA = 
 PROF_DIR = profile
 
