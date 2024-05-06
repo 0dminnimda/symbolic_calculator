@@ -375,26 +375,12 @@ bool SumOfProducts_are_equal(const SumOfProducts *self, const SumOfProducts *oth
 void SumOfProducts_multiply(
     const SumOfProducts *self, const SumOfProducts *other, SumOfProducts *result
 ) {
-    // @Optimization: 'self' and 'other' have shared products (S) and unique ones (U1, U2)
-    // Using this we can decompose multiplication into predictable mini-muplitiplications:
-    // (S + U1) * (S + U2) = S*S + S*(U1 + U2) + U1*U2
-    // 1. S*S looks like (a + b + ... z) * (a + b + ... z) =
-    //    = a*a + b*b + ... + z*z + 2*a*b + ... + 2*a*z + 2*b*z
-    //    and all of them are unique because S are unique (as well as 'self' or 'other')
-    // 2. (U1 + U2) are all also unique, since U1 and U2 are unique in set of all variables
-    //    S and (U1 + U2) also don't share common products, so each term is unique,
-    //    when it's added, no need to check if it exists
-    // 3. U1*U2  are all also unique, so we hae the same situation where each product
-    //    can be just added without checking
-    // Since all 3 operands are unique (since they are cartesian products of pairwise unique sets)
-    // So when adding those SOPs we can all the same just concatenate without checking
+    // This is suboptimal for sure, as it's O(n^3*k),
+    // where n = max/average length of SOP and k = max/average amount of terms in product 
 
-    // Example:
-    // (S + U1) * (S + U2) = ((a + b) + (c)) * ((a + b) + (d)) =
-    // = a*a + 2*a*b + b*b  +  a*d + b*d + c*a + c*b  +  c*d =
-    // = (a * b) * (a * b)  +  d*(a + b) + c*(a + b)  +  c*d =
-    // = (a + b) * (a + b)  +  (a + b) * (c + d) + (c) * (d) =
-    // = S*S + S*(U1 + U2) + U1*U2
+    // The real way to speed this up is to use Dense or Sparse Polynomial multiplication
+    // The choice Dense or Sparse really depends on the data,
+    // but they will be essentially be represented by n-dimentional arrays
 
     // For now though a simple algorithm is used
     // - generate each possiple pair and add it to the total
