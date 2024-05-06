@@ -246,29 +246,10 @@ void SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
     long *variable_powers, size_t *index_map, Product *self_products
 ) {
     bool performed_operation = false;
-#ifdef DEBUG_SOP
-    printf("From the first loop: ");
-    Product_fprint(product_other, stdout, other_variables, false);
-    printf("\n");
-#endif
-
     for_list(Product *, product_self, self_products) {
-#ifdef DEBUG_SOP
-        printf("  From the second loop: ");
-        Product_fprint(product_self, stdout, &self->variables, false);
-        printf("\n");
-#endif
-
         if (Product_are_mapped_terms_equal(
                 product_self, product_other, self->variables.size, variable_powers, index_map
             )) {
-#ifdef DEBUG_SOP
-            printf("Matched two products:\n");
-            Product_fprint(product_self, stdout, &self->variables, false);
-            printf("\n");
-            Product_fprint(product_other, stdout, other_variables, false);
-            printf("\n");
-#endif
             if (is_sub) {
                 product_self->coefficient -= product_other->coefficient;
             } else {
@@ -285,11 +266,6 @@ void SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
     // it means that the current term combination is not present in the self
     // add it
     if (!performed_operation) {
-#ifdef DEBUG_SOP
-        printf("Adding new product:\n");
-        Product_fprint(product_other, stdout, other_variables, false);
-        printf("\n");
-#endif
         Product *new_product = malloc(sizeof(Product));
         Product_copy(product_other, new_product);
         if (is_sub) {
@@ -401,33 +377,13 @@ void SumOfProducts_multiply(
     long *variable_powers = malloc(result->variables.size * sizeof(long));
 
     for_list(Product *, product_self, self->products) {
-#ifdef DEBUG_SOP
-        printf("From the first loop (mult): ");
-        Product_fprint(product_self, stdout, &self->variables, false);
-        printf("\n");
-#endif
         for_list(Product *, product_other, other->products) {
-#ifdef DEBUG_SOP
-            printf("  From the second loop (mult): ");
-            Product_fprint(product_other, stdout, &other->variables, false);
-            printf("\n");
-#endif
             Product new_product;
             Product_multiply_mapped(product_self, product_other, &new_product, index_map);
-#ifdef DEBUG_SOP
-            printf("  New product in loop (mult): ");
-            Product_fprint(&new_product, stdout, &result->variables, false);
-            printf("\n");
-#endif
             SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
                 result, &new_product, &result->variables, false, variable_powers, identity_index_map, result->products
             );
             Product_destruct(&new_product);
-#ifdef DEBUG_SOP
-            printf("  Total (mult): ");
-            SumOfProducts_fprint(result, stdout);
-            printf("\n");
-#endif
         }
     }
 
