@@ -418,6 +418,10 @@ void SumOfProducts_multiply(
     // The choice Dense or Sparse really depends on the data,
     // but they will be essentially be represented by n-dimentional arrays
 
+    // @Optimization: although I think a marginal one
+    // We can sort the products by the sum of powers (terms count)
+    // and stop scannin the total sum after term count became larger than the current one
+
     // For now though a simple algorithm is used
     // - generate each possiple pair and add it to the total
 
