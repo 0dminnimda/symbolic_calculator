@@ -176,7 +176,6 @@ void Variables_copy(const Variables *self, Variables *copy) {
 void SumOfProducts_construct(SumOfProducts *self) {
     Variables_construct(&self->variables, 0);
     self->products = NULL;
-    self->products_count = 0;
 }
 void SumOfProducts_destruct(SumOfProducts *self) {
     Variables_destruct(&self->variables);
@@ -202,7 +201,6 @@ void SumOfProducts_fprint(const SumOfProducts *self, FILE *stream) {
 void SumOfProducts_insert_product(SumOfProducts *self, Product *product) {
     product->next = self->products;
     self->products = product;
-    ++self->products_count;
 }
 Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_product) {
     /*
@@ -216,7 +214,6 @@ Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_pr
         Product *current = self->products;
         if (current == NULL) return NULL;
 
-        --self->products_count;
         self->products = current->next;
         Product_destruct(current);
         free(current);
@@ -225,7 +222,6 @@ Product *SumOfProducts_remove_next_product(SumOfProducts *self, Product *prev_pr
         Product *current = prev_product->next;
         if (current == NULL) return NULL;
 
-        --self->products_count;
         prev_product->next = current->next;
         Product_destruct(current);
         free(current);
@@ -447,87 +443,6 @@ void SumOfProducts_multiply(
             printf("\n");
 #endif
         }
-    }
-
-    // @FIXME after removing it's possible that we will have some unused strings
-    // but for now i think it's fine to leave it that way
-    SumOfProducts_remove_zero_coefficient_products(result);
-
-    free(variable_powers);
-    free(identity_index_map);
-    free(index_map);
-}
-void SumOfProducts_multiply_2(
-    const SumOfProducts *self, const SumOfProducts *other, SumOfProducts *result
-) {
-    // 'self' and 'other' have shared products (S1, S2 - differing only with coefficients)
-    // and unique ones (U1, U2)
-    // Using this we can decompose multiplication into predictable mini-muplitiplications:
-    // (S1 + U1) * (S2 + U2) = S1*S2 + S1*U2 + S2*U1 + U1*U2
-    //
-    // Since we have canonical form, S1 + U1 don't shared products as well as S2 + U2
-    // Now, since S1 and S2 do share products with different coefficients, then
-    // U1 don't share products with any of (S1, S2, U2), same for U2 and (S1, S2, U1)
-    // This means that their multiplications ()
-    //
-    // 1. S*S looks like (c1*a + c2*b + ... cn*z) * (k1*a + k2*b + ... km*z) =
-    //    = c1*k1*a*a + c2*k2*b*b + ... + cn*km*z*z +
-    //    + (c1*k2 + c2*k1)*a*b + ... + (c1*km + cn*k1)*a*z + (c2*km + cn*k2)*b*z
-    //    and all of them are unique because S1 and S2 are unique (as well as 'self' or 'other')
-    // 2. S1*U2 are all also unique, since S1 and U2 also don't share common products,
-    //    so each term is unique, when it's added, no need to check if it exists
-    // 3. S2*U1 are all also unique, since U1 and U2 are unique in set of all variables
-    //    S and (U1 + U2) also don't share common products, so each term is unique,
-    //    when it's added, no need to check if it exists
-    // 4. U1*U2  are all also unique, so we hae the same situation where each product
-    //    can be just added without checking
-    // Since all 3 operands are unique (since they are cartesian products of pairwise unique sets)
-    // So when adding those SOPs we can all the same just concatenate without checking
-
-    // Example:
-    // (S + U1) * (S + U2) = ((a + b) + (c)) * ((a + b) + (d)) =
-    // = a*a + 2*a*b + b*b  +  a*d + b*d + c*a + c*b  +  c*d =
-    // = (a * b) * (a * b)  +  d*(a + b) + c*(a + b)  +  c*d =
-    // = (a + b) * (a + b)  +  (a + b) * (c + d) + (c) * (d) =
-    // = S*S + S*(U1 + U2) + U1*U2
-
-    // (a)
-
-    SumOfProducts_construct(result);
-    Variables_copy(&self->variables, &result->variables);
-
-    size_t *index_map = malloc((result->variables.size + other->variables.size) * sizeof(size_t));
-    for (size_t i = 0; i < other->variables.size; ++i) {
-        index_map[i] = Variables_insert(&result->variables, &other->variables.data[i]);
-    }
-
-    // The ideas is to have an array of flags, that say if a product is shared or not
-    // We need to know/set only shared or unset only unique to have it fully complete
-    long *variable_powers = malloc(result->variables.size * sizeof(long));
-    bool *is_shared_product_self = malloc(self->products_count * sizeof(bool));
-    memset(is_shared_product_self, 0xFF, self->products_count * sizeof(bool));
-    bool *is_shared_product_other = malloc(other->products_count * sizeof(bool));
-    memset(is_shared_product_other, 0, other->products_count * sizeof(bool));
-
-    size_t product_index_self = 0;
-    for_list(Product *, product_self, self->products) {
-        bool matched = false;
-        size_t product_index_other = 0;
-        for_list(Product *, product_other, other->products) {
-            if (Product_are_mapped_terms_equal(
-                product_self, product_other, self->variables.size, variable_powers, index_map
-            )) {
-                // If we have found a matching product, it must be shared
-                is_shared_product_other[product_index_other] = true;
-                matched = true;
-            }
-            ++product_index_other;
-        }
-        if (!matched) {
-            // If we have not found a matching product, it must be unique
-            is_shared_product_self[product_index_self] = false;
-        }
-        ++product_index_self;
     }
 
     // @FIXME after removing it's possible that we will have some unused strings
