@@ -9,8 +9,8 @@
 bool parse_sum_of_product_with_errors(const char *str, SumOfProducts *result) {
     const char *error;
     if (!parse_sum_of_product_from_string(str, result, &error)) {
-        fprintf(stderr, "started at: '%s'\n", str);
-        fprintf(stderr, "stopped at: '%s'\n", error);
+        fprintf(stderr, "started at: '%100s'\n", str);
+        fprintf(stderr, "stopped at: '%100s'\n", error);
         // fprintf(stderr, "^\n");
         fprintf(stderr, "Invalid equation\n");
         return false;

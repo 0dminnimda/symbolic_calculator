@@ -110,7 +110,7 @@ bool parse_product(Parser *parser, Product *result) {
     }
 #ifdef DEBUG_PARSER
     else {
-        printf("parse_product, no parse_i64 for '%s'\n", parser->str);
+        printf("parse_product, no parse_i64 for '%100s'\n", parser->str);
     }
 #endif
     result->coefficient *= coefficient;
@@ -127,7 +127,7 @@ bool parse_product(Parser *parser, Product *result) {
         } else {
             if (*parser->str != '*') {
 #ifdef DEBUG_PARSER
-                printf("parse_product: hit non '*' '%s'\n", parser->str);
+                printf("parse_product: hit non '*' '%100s'\n", parser->str);
 #endif
                 break;
             }
@@ -187,7 +187,7 @@ bool parse_sum_of_product(Parser *parser, SumOfProducts *result) {
             ++parser->str;
         } else if (!first) {
 #ifdef DEBUG_PARSER
-            printf("parse_sum_of_product, not [+-] '%s'\n", parser->str);
+            printf("parse_sum_of_product, not [+-] '%100s'\n", parser->str);
 #endif
             return false;
         }
