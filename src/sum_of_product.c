@@ -1,5 +1,6 @@
 #include "sum_of_product.h"
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -52,9 +53,9 @@ void Product_fprint(
         }
     } else {
         if (printed_after_other_products) {
-            fprintf(stream, "%+lld", self->coefficient);
+            fprintf(stream, "%+" PRId64, self->coefficient);
         } else {
-            fprintf(stream, "%lld", self->coefficient);
+            fprintf(stream, "%" PRId64, self->coefficient);
         }
         first_term = false;
     }
