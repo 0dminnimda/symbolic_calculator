@@ -29,7 +29,7 @@ valgrind:
 
 .PHONY: test_small
 test_small:
-	$(PYTHON) tests/run.py src/main.out tests/**/*.input !tests/**/big*_char.input
+	$(PYTHON) tests/run.py src/main.out tests/**/*.input !tests/**/big*.input
 
 
 .PHONY: test
