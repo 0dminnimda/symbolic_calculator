@@ -42,8 +42,14 @@ void Product_fprint(
         if (printed_after_other_products) {
             fprintf(stream, "+");
         }
+        if (self->terms_count == 0) {
+            fprintf(stream, "1");
+        }
     } else if (self->coefficient == -1) {
         fprintf(stream, "-");
+        if (self->terms_count == 0) {
+            fprintf(stream, "1");
+        }
     } else {
         if (printed_after_other_products) {
             fprintf(stream, "%+ld", self->coefficient);
