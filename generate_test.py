@@ -108,17 +108,22 @@ def generate_equality(equal: bool):
 
 
 def generate_multiplication():
+    print("Preparing")
+
     import sympy
 
     var_map = dict(zip(variables, sympy.symbols(variables)))
 
+    print("Converting symbols")
     sym_products = []
-    for product in products:
+    for i, product in enumerate(products):
+        print(f"{i}/{len(products)}")
         new_product = sympy.S.One
         for var in product:
             new_product *= var_map[var]
         sym_products.append(new_product)
 
+    print("Generating polynomials")
     coefficients1 = [generate_coeff(*NUMBER_BOUNDS) for _ in range(len(products))]
     coefficients2 = [generate_coeff(*NUMBER_BOUNDS) for _ in range(len(products))]
     poly1 = sum((p * c for c, p in zip(coefficients1, sym_products)), sympy.S.Zero)
@@ -127,15 +132,21 @@ def generate_multiplication():
     print("Multiplying")
     result = sympy.expand(poly1 * poly2)
 
-    def expand_to_text(expr):
+    def add_sep(result, it, sep):
+        for i, item in enumerate(it):
+            if i:
+                result.append(sep)
+            expand_to_text(result, item)
+
+    def expand_to_text(result, expr):
         if isinstance(expr, sympy.Pow):
-            return "*".join([expand_to_text(expr.base)] * int(expr.exp))
+            add_sep(result, [expr.base] * int(expr.exp), "*")
         elif isinstance(expr, sympy.Mul):
-            return '*'.join(expand_to_text(term) for term in expr.args)
+            add_sep(result, expr.args, "*")
         elif isinstance(expr, sympy.Add):
-            return ' + '.join(expand_to_text(term) for term in expr.args)
+            add_sep(result, expr.args, " + ")
         else:
-            return str(expr)
+            result.append(str(expr))
 
     print("Dumping strings")
     input_s: list[str] = []
@@ -146,7 +157,7 @@ def generate_multiplication():
         print_coefficients(input_s, coefficients)
 
     output_s: list[str] = []
-    output_s.append(expand_to_text(result))
+    expand_to_text(output_s, result)
     output_s.append("\n")
 
     return "".join(input_s), "".join(output_s)
