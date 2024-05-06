@@ -71,6 +71,10 @@ const Term *Product_get_last_term_const(const Product *self);
 void Product_extend_from(Product *self, const Product *source);
 void Product_copy(const Product *self, Product *copy);
 void Product_insert_term(Product *self, Term *term);
+bool Product_are_terms_equal(
+    const Product *self, const Product *other, size_t variable_count,
+    long *variable_powers
+);
 bool Product_are_mapped_terms_equal(
     const Product *self, const Product *other, size_t variable_count,
     long *variable_powers, const size_t *index_map_for_other

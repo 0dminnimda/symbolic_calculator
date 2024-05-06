@@ -95,6 +95,40 @@ void Product_multiply_mapped(
     }
     Product_extend_from(result, self);
 }
+bool Product_are_terms_equal(
+    const Product *self, const Product *other, size_t variable_count, long *variable_powers
+) {
+    if (self->terms_count != other->terms_count) return false;
+
+    // We don't case about the order of variables,
+    // we only care that there is the same amount of them in each product
+    // so we just count the amount, veriables in self count up and in other - down
+    // @XXX can we get read of this memset? will initializing the array using self->terms be
+    // better/feasable?
+    memset(variable_powers, 0, variable_count * sizeof(long));
+
+    long unique_variable_count = 0;
+    for_list(Term *, term, self->terms) {
+        long *power = &variable_powers[term->variable_index];
+        if (*power == 0) ++unique_variable_count;
+        *power += 1;
+    }
+
+    for_list(Term *, term, other->terms) {
+        long *power = &variable_powers[term->variable_index];
+        // If we are trying to decrease something that is already 0
+        // => there's more of this variable in 'other'
+        if (*power == 0) return false;
+        *power -= 1;
+        // If we hit 0 here, it means that the powers canceled out,
+        // and the case where the power will get negative is handled above
+        if (*power == 0) --unique_variable_count;
+    }
+
+    // If we canceled the same amount of unique variables we starting with
+    // it means that the product terms are the same
+    return unique_variable_count == 0;
+}
 bool Product_are_mapped_terms_equal(
     const Product *self, const Product *other, size_t variable_count, long *variable_powers,
     const size_t *index_map_for_other
@@ -242,8 +276,8 @@ void SumOfProducts_remove_zero_coefficient_products(SumOfProducts *self) {
     }
 }
 void SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
-    SumOfProducts *self, const Product *product_other, const Variables *other_variables, bool is_sub,
-    long *variable_powers, size_t *index_map, Product *self_products
+    SumOfProducts *self, const Product *product_other, bool is_sub, long *variable_powers,
+    size_t *index_map, Product *self_products
 ) {
     bool performed_operation = false;
     for_list(Product *, product_self, self_products) {
@@ -279,6 +313,33 @@ void SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
         SumOfProducts_insert_product(self, new_product);
     }
 }
+void SumOfProducts_inplace_add_Product_preallocated_owning(
+    SumOfProducts *self, Product *product_other, long *variable_powers, Product *self_products
+) {
+    bool performed_operation = false;
+    for_list(Product *, product_self, self_products) {
+        if (Product_are_terms_equal(
+                product_self, product_other, self->variables.size, variable_powers
+            )) {
+            product_self->coefficient += product_other->coefficient;
+            performed_operation = true;
+            // canonical SOP don't contain repeating products with the same terms
+            // so we won't find anything further to add
+            break;
+        }
+    }
+
+    // if we did not find anything to act upon -
+    // it means that the current term combination is not present in the self
+    // add it
+    if (!performed_operation) {
+        SumOfProducts_insert_product(self, product_other);
+    } else {
+        // owning - we own the product memory
+        Product_destruct(product_other);
+        free(product_other);
+    }
+}
 void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *other, bool is_sub) {
     size_t *index_map = malloc((self->variables.size + other->variables.size) * sizeof(size_t));
     for (size_t i = 0; i < other->variables.size; ++i) {
@@ -293,8 +354,7 @@ void SumOfProducts_inplace_add_sub(SumOfProducts *self, const SumOfProducts *oth
         // we don't need to check the newly added products
         // when adding any other product from 'other'
         SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
-            self, product_other, &other->variables, is_sub, variable_powers, index_map,
-            original_self_products
+            self, product_other, is_sub, variable_powers, index_map, original_self_products
         );
     }
 
@@ -352,7 +412,7 @@ void SumOfProducts_multiply(
     const SumOfProducts *self, const SumOfProducts *other, SumOfProducts *result
 ) {
     // This is suboptimal for sure, as it's O(n^3*k),
-    // where n = max/average length of SOP and k = max/average amount of terms in product 
+    // where n = max/average length of SOP and k = max/average amount of terms in product
 
     // The real way to speed this up is to use Dense or Sparse Polynomial multiplication
     // The choice Dense or Sparse really depends on the data,
@@ -368,22 +428,16 @@ void SumOfProducts_multiply(
     for (size_t i = 0; i < other->variables.size; ++i) {
         index_map[i] = Variables_insert(&result->variables, &other->variables.data[i]);
     }
-    // YUCK!!
-    size_t *identity_index_map = malloc(result->variables.size * sizeof(size_t));
-    for (size_t i = 0; i < result->variables.size; ++i) {
-        identity_index_map[i] = i;
-    }
 
     long *variable_powers = malloc(result->variables.size * sizeof(long));
 
     for_list(Product *, product_self, self->products) {
         for_list(Product *, product_other, other->products) {
-            Product new_product;
-            Product_multiply_mapped(product_self, product_other, &new_product, index_map);
-            SumOfProducts_inplace_add_sub_Product_mapped_preallocated(
-                result, &new_product, &result->variables, false, variable_powers, identity_index_map, result->products
+            Product *new_product = malloc(sizeof(Product));
+            Product_multiply_mapped(product_self, product_other, new_product, index_map);
+            SumOfProducts_inplace_add_Product_preallocated_owning(
+                result, new_product, variable_powers, result->products
             );
-            Product_destruct(&new_product);
         }
     }
 
@@ -392,6 +446,5 @@ void SumOfProducts_multiply(
     SumOfProducts_remove_zero_coefficient_products(result);
 
     free(variable_powers);
-    free(identity_index_map);
     free(index_map);
 }
