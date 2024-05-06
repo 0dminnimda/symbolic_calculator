@@ -90,7 +90,9 @@ def unify(output: str) -> list[tuple[int, list[str]]]:
 STR_LIM = 1000
 
 
-def limit_str(s: str, limit: int) -> str:
+def limit_str(s: str, limit: int | None) -> str:
+    if limit is None:
+        return s
     if len(s) >= limit:
         return s[:limit] + "..."
     return s
