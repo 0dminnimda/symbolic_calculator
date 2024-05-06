@@ -29,6 +29,7 @@ typedef struct {
 
 typedef struct {
     Product *products;
+    size_t products_count;
     Variables variables;
 } SumOfProducts;
 
